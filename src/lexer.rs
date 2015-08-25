@@ -38,7 +38,9 @@ impl Lexer {
 
         if ch.is_digit(10) {
             Some(self.parse_digit(ch))
-        } else if ch.is_alphabetic() {
+        } else if ch == '"' || ch == '\'' {
+            Some(self.parse_string(ch))
+        } else if ch.is_alphabetic() || ch == '_' {
             Some(self.parse_alphabetic(ch))
         } else if is_special(ch) {
             Some(self.parse_special(ch))
@@ -74,7 +76,37 @@ impl Lexer {
 
         self.index = index;
 
-        Token::new(string, start, index)
+        Token::new(string, String::from("number"), start, index)
+    }
+
+    #[inline(always)]
+    fn parse_string(&mut self, ch: char) -> Token {
+        let start = self.index;
+        let mut index = start + 1;
+        let mut can_end = false;
+        let mut string = String::new();
+
+        string.push(ch);
+
+        while index < self.length {
+            let ch = self.chars.get(index).expect("the world is ending").clone();
+
+            if can_end && (ch.is_whitespace() || is_special(ch)) {
+                break;
+            } else {
+                can_end = false;
+                string.push(ch);
+                index += 1;
+            }
+
+            if ch == '"' || ch == '\'' {
+                can_end = true;
+            }
+        }
+
+        self.index = index;
+
+        Token::new(string, String::from("string"), start, index)
     }
 
     #[inline(always)]
@@ -88,7 +120,7 @@ impl Lexer {
         while index < self.length {
             let ch = self.chars.get(index).expect("the world is ending").clone();
 
-            if ch.is_alphanumeric() {
+            if ch.is_alphanumeric() || ch == '_' {
                 string.push(ch);
                 index += 1;
             } else {
@@ -98,7 +130,7 @@ impl Lexer {
 
         self.index = index;
 
-        Token::new(string, start, index)
+        Token::new(string, String::from("name"), start, index)
     }
 
     #[inline(always)]
@@ -110,7 +142,7 @@ impl Lexer {
         string.push(ch);
 
         self.index = index;
-        Token::new(string, start, index)
+        Token::new(string, String::from("operator"), start, index)
     }
 }
 
