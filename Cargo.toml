@@ -2,3 +2,10 @@
 name = "lexer"
 version = "0.1.0"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
+
+keywords = ["lexer"]
+description = "lexer for basic token parsing"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/nathanfaucett/rs-lexer.git"
+homepage = "https://github.com/nathanfaucett/rs-lexer"
