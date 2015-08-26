@@ -4,7 +4,7 @@ use lexer::Lexer;
 
 #[test]
 fn test_lexer() {
-    let mut lexer = Lexer::new(String::from("(defn add_one [x] (+ x 1.0 \"asdf\"))"));
+    let mut lexer = Lexer::new(String::from("(defn add_one [x] (+ x .1 \"asdf\"))"));
 
     macro_rules! test_next {
         ($value:expr, $kind:expr) => (
@@ -18,17 +18,17 @@ fn test_lexer() {
         );
     }
 
-    test_next!("(", "operator");
+    test_next!("(", "syntex");
     test_next!("defn", "name");
     test_next!("add_one", "name");
-    test_next!("[", "operator");
+    test_next!("[", "syntex");
     test_next!("x", "name");
-    test_next!("]", "operator");
-    test_next!("(", "operator");
+    test_next!("]", "syntex");
+    test_next!("(", "syntex");
     test_next!("+", "operator");
     test_next!("x", "name");
-    test_next!("1.0", "number");
-    test_next!("\"asdf\"", "string");
-    test_next!(")", "operator");
-    test_next!(")", "operator");
+    test_next!(".1", "number");
+    test_next!("asdf", "string");
+    test_next!(")", "syntex");
+    test_next!(")", "syntex");
 }
