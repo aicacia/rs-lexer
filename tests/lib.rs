@@ -1,10 +1,33 @@
+#![feature(collections)]
+
+use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+
 extern crate lexer;
 use lexer::Lexer;
+
+extern crate collections;
+use collections::string::String;
 
 
 #[test]
 fn test_lexer() {
-    let mut lexer = Lexer::new(String::from("(defn add_one [x] (+ x .1 \"asdf\"))"));
+    let path = Path::new(file!()).parent().unwrap().join(Path::new("example.lisp"));
+
+    let mut file = match File::open(&path) {
+        Err(why) => panic!("couldn't open {}: {}", path.display(), Error::description(&why)),
+        Ok(file) => file,
+    };
+
+    let mut string = String::new();
+    match file.read_to_string(&mut string) {
+        Err(why) => panic!("couldn't read {}: {}", path.display(), Error::description(&why)),
+        _ => (),
+    }
+
+    let mut lexer = Lexer::new(string, String::from("[](){}<>"));
 
     macro_rules! test_next {
         ($value:expr, $kind:expr) => (
@@ -19,16 +42,31 @@ fn test_lexer() {
     }
 
     test_next!("(", "syntex");
-    test_next!("defn", "name");
-    test_next!("add_one", "name");
+    test_next!("defn", "symbol");
+    test_next!("fac", "symbol");
     test_next!("[", "syntex");
-    test_next!("x", "name");
+    test_next!("x", "symbol");
     test_next!("]", "syntex");
     test_next!("(", "syntex");
-    test_next!("+", "operator");
-    test_next!("x", "name");
-    test_next!(".1", "number");
-    test_next!("asdf", "string");
+    test_next!("if", "symbol");
+    test_next!("(", "syntex");
+    test_next!("=", "symbol");
+    test_next!("x", "symbol");
+    test_next!("0x01", "number");
+    test_next!(")", "syntex");
+    test_next!("1.0", "number");
+    test_next!("(", "syntex");
+    test_next!("*", "symbol");
+    test_next!("x", "symbol");
+    test_next!("(", "syntex");
+    test_next!("fac", "symbol");
+    test_next!("(", "syntex");
+    test_next!("-", "symbol");
+    test_next!("x", "symbol");
+    test_next!("1", "number");
+    test_next!(")", "syntex");
+    test_next!(")", "syntex");
+    test_next!(")", "syntex");
     test_next!(")", "syntex");
     test_next!(")", "syntex");
 }
