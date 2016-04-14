@@ -37,7 +37,10 @@ impl Lexer {
 
             if ch.is_whitespace() {
                 self.next_token()
-            } else if ch.is_digit(10) || ((ch == '-' || ch == '.') && self.char_at(0).is_digit(10)) {
+            } else if
+                ch.is_digit(10) ||
+                ((ch == '-' || ch == '.') && self.has_char_at(0) && self.char_at(0).is_digit(10))
+            {
                 Some(self.read_digit(ch))
             } else if ch == '\'' || ch == '"' {
                 Some(self.read_quoted(ch))
@@ -77,6 +80,11 @@ impl Lexer {
     #[inline(always)]
     fn char_at(&self, index: usize) -> char {
         self.chars.get(self.index + index).expect("unexpected end of input").clone()
+    }
+
+    #[inline(always)]
+    fn has_char_at(&self, index: usize) -> bool {
+        (self.index + index) < self.length
     }
 
     #[inline(always)]
