@@ -1,13 +1,12 @@
-use collections::string::String;
 use collections::vec::Vec;
-use core::iter::Iterator;
+use collections::string::String;
 
+use kind::Kind;
 use token::Token;
 
 
 #[derive(Debug)]
 pub struct Lexer {
-    syntex: String,
     index: usize,
     row: usize,
     column: usize,
@@ -16,11 +15,10 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(string: String, syntex: String) -> Lexer {
+    pub fn new(string: &str) -> Lexer {
         let chars: Vec<char> = string.chars().collect();
 
         Lexer {
-            syntex: syntex,
             index: 0usize,
             row: 1usize,
             column: 1usize,
@@ -33,23 +31,28 @@ impl Lexer {
         if self.index == self.length {
             None
         } else {
+            let start_index = self.index;
             let ch = self.read();
+            let row = self.row;
+            let column = self.column;
 
-            if ch.is_whitespace() {
+            if ch.is_whitespace() || ch == ',' {
                 self.next_token()
+            } else if ch == '"' || ch == '\'' {
+                Some(self.read_quoted(ch, start_index, row, column))
             } else if
                 ch.is_digit(10) ||
                 ((ch == '-' || ch == '.') && self.has_char_at(0) && self.char_at(0).is_digit(10))
             {
-                Some(self.read_digit(ch))
-            } else if ch == '\'' || ch == '"' {
-                Some(self.read_quoted(ch))
-            } else if self.is_syntex(ch) {
-                Some(self.read_syntex(ch))
+                Some(self.read_number(ch, start_index, row, column))
             } else {
-                Some(self.read_symbol(ch))
+                Some(self.read_symbol(ch, start_index, row, column))
             }
         }
+    }
+
+    pub fn has_next_token(&self) -> bool {
+        self.index < self.length - 1
     }
 
     fn read(&mut self) -> char {
@@ -69,14 +72,6 @@ impl Lexer {
         ch
     }
 
-    fn read_size(&mut self, size: usize) -> String {
-        let mut out = String::new();
-        for _ in 0..size {
-            out.push(self.read());
-        }
-        out
-    }
-
     #[inline(always)]
     fn char_at(&self, index: usize) -> char {
         self.chars.get(self.index + index).expect("unexpected end of input").clone()
@@ -87,17 +82,61 @@ impl Lexer {
         (self.index + index) < self.length
     }
 
-    #[inline(always)]
-    fn new_token(&self, string: String, token_type: String) -> Token {
-        Token::new(string, token_type, self.row, self.column)
+    fn read_size(&mut self, size: usize) -> String {
+        let mut out = String::new();
+
+        for _ in 0..size {
+            out.push(self.read());
+        }
+
+        out
     }
 
-    #[inline(always)]
-    fn is_syntex(&self, ch: char) -> bool {
-        self.syntex.contains(ch)
+    fn read_quoted(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
+        let quote = ch;
+        let mut index = self.index;
+        let mut escape = false;
+        let mut string = String::new();
+
+        while index < self.length {
+            let ch = self.char_at(0);
+            let mut count = 1;
+
+            if escape {
+                if ch == 'u' {
+                    self.read();
+                    let hex = self.read_size(4);
+                    count = 4;
+                    string.push(hex.parse::<u8>().unwrap() as char);
+                } else {
+                    self.read();
+                    string.push(Self::escape_char(ch));
+                }
+                escape = false;
+            } else if ch == '\\' {
+                self.read();
+                escape = true;
+            } else if ch == quote {
+                self.read();
+                break;
+            } else {
+                self.read();
+                string.push(ch);
+            }
+
+            index += count;
+        }
+
+        let kind = if quote == '\'' {
+            Kind::Char
+        } else {
+            Kind::Str
+        };
+
+        Token::new(string, kind, start_index, row, column)
     }
 
-    fn read_digit(&mut self, ch: char) -> Token {
+    fn read_number(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut index = self.index;
         let mut parsed_period = false;
         let mut parsed_hex = false;
@@ -139,48 +178,10 @@ impl Lexer {
             }
         }
 
-        self.new_token(string, String::from("number"))
+        Token::new(string, Kind::Number, start_index, row, column)
     }
 
-    fn read_quoted(&mut self, ch: char) -> Token {
-        let quote = ch;
-        let mut index = self.index;
-        let mut escape = false;
-        let mut string = String::new();
-
-        while index < self.length {
-            let ch = self.char_at(0);
-            let mut count = 1;
-
-            if escape {
-                if ch == 'u' {
-                    self.read();
-                    let hex = self.read_size(4);
-                    count = 4;
-                    string.push(hex.parse::<u8>().unwrap() as char);
-                } else {
-                    self.read();
-                    string.push(escape_char(ch));
-                }
-                escape = false;
-            } else if ch == '\\' {
-                self.read();
-                escape = true;
-            } else if ch == quote {
-                self.read();
-                break;
-            } else {
-                self.read();
-                string.push(ch);
-            }
-
-            index += count;
-        }
-
-        self.new_token(string, string_from_char(quote))
-    }
-
-    fn read_symbol(&mut self, ch: char) -> Token {
+    fn read_symbol(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut index = self.index;
         let mut string = String::new();
 
@@ -189,7 +190,7 @@ impl Lexer {
         while index < self.length {
             let ch = self.char_at(0);
 
-            if ch.is_alphanumeric() || ch == '_' {
+            if ch.is_alphanumeric() || (ch == '_' || ch == '-' || ch == ':') {
                 string.push(ch);
                 self.read();
                 index += 1;
@@ -198,30 +199,29 @@ impl Lexer {
             }
         }
 
-        self.new_token(string, String::from("symbol"))
+        Token::new(string, Kind::Symbol, start_index, row, column)
     }
 
-    fn read_syntex(&mut self, ch: char) -> Token {
-        self.new_token(string_from_char(ch), String::from("syntex"))
+    #[inline(always)]
+    fn escape_char(ch: char) -> char {
+        match ch {
+            'n' => '\n',
+            'r' => '\r',
+            't' => '\t',
+            '\'' => '\'',
+            '"' => '"',
+            _ => ch
+        }
     }
-}
 
-#[inline(always)]
-fn string_from_char(ch: char) -> String {
-    let mut string = String::new();
-    string.push(ch);
-    string
-}
+    pub fn read_to_vec(&mut self) -> Vec<Token> {
+        let mut tokens = Vec::new();
 
-#[inline(always)]
-fn escape_char(ch: char) -> char {
-    match ch {
-        'n' => '\n',
-        'r' => '\r',
-        't' => '\t',
-        '\'' => '\'',
-        '"' => '"',
-        _ => ch
+        for token in self {
+            tokens.push(token);
+        }
+
+        tokens
     }
 }
 
@@ -231,5 +231,39 @@ impl Iterator for Lexer {
     #[inline(always)]
     fn next(&mut self) -> Option<Token> {
         self.next_token()
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use lexer::Lexer;
+
+
+    #[test]
+    fn test_lexer() {
+        let mut lexer = Lexer::new("
+            symbol
+            \"double quoted\"
+            'char'
+            10.0
+            0xff
+            128
+            5usize
+            {}
+            ()
+        ");
+        assert_eq!(lexer.next().unwrap().value(), "symbol");
+        assert_eq!(lexer.next().unwrap().value(), "double quoted");
+        assert_eq!(lexer.next().unwrap().value(), "char");
+        assert_eq!(lexer.next().unwrap().value(), "10.0");
+        assert_eq!(lexer.next().unwrap().value(), "0xff");
+        assert_eq!(lexer.next().unwrap().value(), "128");
+        assert_eq!(lexer.next().unwrap().value(), "5");
+        assert_eq!(lexer.next().unwrap().value(), "usize");
+        assert_eq!(lexer.next().unwrap().value(), "{");
+        assert_eq!(lexer.next().unwrap().value(), "}");
+        assert_eq!(lexer.next().unwrap().value(), "(");
+        assert_eq!(lexer.next().unwrap().value(), ")");
     }
 }
