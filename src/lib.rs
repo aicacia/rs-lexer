@@ -1,5 +1,6 @@
 #![feature(collections)]
-#![no_std]
+//#![no_std]
+extern crate core;
 
 
 extern crate collections;
@@ -10,6 +11,6 @@ mod lexer;
 mod token;
 
 
-pub use kind::Kind;
-pub use lexer::Lexer;
-pub use token::Token;
+pub use self::kind::Kind;
+pub use self::lexer::Lexer;
+pub use self::token::Token;

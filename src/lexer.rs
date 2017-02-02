@@ -1,8 +1,8 @@
 use collections::vec::Vec;
 use collections::string::String;
 
-use kind::Kind;
-use token::Token;
+use super::kind::Kind;
+use super::token::Token;
 
 
 #[derive(Debug)]
@@ -190,7 +190,7 @@ impl Lexer {
         while index < self.length {
             let ch = self.char_at(0);
 
-            if ch.is_alphanumeric() || (ch == '_' || ch == '-' || ch == ':') {
+            if ch.is_alphanumeric() || ch == '_' {
                 string.push(ch);
                 self.read();
                 index += 1;
@@ -198,6 +198,8 @@ impl Lexer {
                 break;
             }
         }
+
+        println!("{:?}", string);
 
         Token::new(string, Kind::Symbol, start_index, row, column)
     }
@@ -237,7 +239,7 @@ impl Iterator for Lexer {
 
 #[cfg(test)]
 mod test {
-    use lexer::Lexer;
+    use super::Lexer;
 
 
     #[test]
@@ -265,5 +267,24 @@ mod test {
         assert_eq!(lexer.next().unwrap().value(), "}");
         assert_eq!(lexer.next().unwrap().value(), "(");
         assert_eq!(lexer.next().unwrap().value(), ")");
+    }
+    #[test]
+    fn test_lang() {
+        let mut lexer = Lexer::new("
+            pub struct Type<T> {
+                value: T,
+            }
+        ");
+        assert_eq!(lexer.next().unwrap().value(), "pub");
+        assert_eq!(lexer.next().unwrap().value(), "struct");
+        assert_eq!(lexer.next().unwrap().value(), "Type");
+        assert_eq!(lexer.next().unwrap().value(), "<");
+        assert_eq!(lexer.next().unwrap().value(), "T");
+        assert_eq!(lexer.next().unwrap().value(), ">");
+        assert_eq!(lexer.next().unwrap().value(), "{");
+        assert_eq!(lexer.next().unwrap().value(), "value");
+        assert_eq!(lexer.next().unwrap().value(), ":");
+        assert_eq!(lexer.next().unwrap().value(), "T");
+        assert_eq!(lexer.next().unwrap().value(), "}");
     }
 }

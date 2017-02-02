@@ -1,6 +1,6 @@
 use collections::string::String;
 
-use kind::Kind;
+use super::kind::Kind;
 
 
 #[derive(Debug)]
