@@ -186,22 +186,27 @@ impl Lexer {
         let mut string = String::new();
 
         string.push(ch);
-
-        while index < self.length {
-            let ch = self.char_at(0);
-
-            if ch.is_alphanumeric() || ch == '_' {
-                string.push(ch);
-                self.read();
-                index += 1;
-            } else {
-                break;
+        
+        if Self::is_alphanumeric(ch) {
+            while index < self.length {
+                let ch = self.char_at(0);
+    
+                if Self::is_alphanumeric(ch) {
+                    string.push(ch);
+                    self.read();
+                    index += 1;
+                } else {
+                    break;
+                }
             }
         }
 
-        println!("{:?}", string);
-
         Token::new(string, Kind::Symbol, start_index, row, column)
+    }
+    
+    #[inline(always)]
+    fn is_alphanumeric(ch: char) -> bool {
+        ch.is_alphanumeric() || ch == '_'
     }
 
     #[inline(always)]
