@@ -224,16 +224,6 @@ impl Lexer {
             _ => ch
         }
     }
-
-    pub fn read_to_vec(&mut self) -> Vec<Token> {
-        let mut tokens = Vec::new();
-
-        for token in self {
-            tokens.push(token);
-        }
-
-        tokens
-    }
 }
 
 impl Iterator for Lexer {
