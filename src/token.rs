@@ -3,7 +3,7 @@ use collections::string::String;
 use super::kind::Kind;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Token {
     kind: Kind,
     value: String,

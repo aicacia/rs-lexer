@@ -40,13 +40,16 @@ impl Lexer {
                 self.next_token()
             } else if ch == '"' || ch == '\'' {
                 Some(self.read_quoted(ch, start_index, row, column))
-            } else if
-                ch.is_digit(10) ||
-                ((ch == '-' || ch == '.') && self.has_char_at(0) && self.char_at(0).is_digit(10))
-            {
+            } else if ch.is_digit(10) || (
+                (ch == '-' || ch == '.') &&
+                self.has_char_at(0) &&
+                self.char_at(0).is_digit(10)
+            ) {
                 Some(self.read_number(ch, start_index, row, column))
-            } else {
+            } else if ch.is_alphabetic() || ch == '_' {
                 Some(self.read_symbol(ch, start_index, row, column))
+            } else {
+                Some(self.read_syntax(ch, start_index, row, column))
             }
         }
     }
@@ -72,12 +75,12 @@ impl Lexer {
         ch
     }
 
-    #[inline(always)]
+    #[inline]
     fn char_at(&self, index: usize) -> char {
         self.chars.get(self.index + index).expect("unexpected end of input").clone()
     }
 
-    #[inline(always)]
+    #[inline]
     fn has_char_at(&self, index: usize) -> bool {
         (self.index + index) < self.length
     }
@@ -186,12 +189,12 @@ impl Lexer {
         let mut string = String::new();
 
         string.push(ch);
-        
-        if Self::is_alphanumeric(ch) {
+
+        if ch.is_alphanumeric() || ch == '_' {
             while index < self.length {
                 let ch = self.char_at(0);
-    
-                if Self::is_alphanumeric(ch) {
+
+                if ch.is_alphanumeric() || ch == '_' {
                     string.push(ch);
                     self.read();
                     index += 1;
@@ -203,13 +206,14 @@ impl Lexer {
 
         Token::new(string, Kind::Symbol, start_index, row, column)
     }
-    
-    #[inline(always)]
-    fn is_alphanumeric(ch: char) -> bool {
-        ch.is_alphanumeric() || ch == '_'
+
+    fn read_syntax(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
+        let mut string = String::new();
+        string.push(ch);
+        Token::new(string, Kind::Syntax, start_index, row, column)
     }
 
-    #[inline(always)]
+    #[inline]
     fn escape_char(ch: char) -> char {
         match ch {
             'n' => '\n',
@@ -244,8 +248,16 @@ impl Iterator for Lexer {
 
 #[cfg(test)]
 mod test {
-    use super::Lexer;
+    use super::{Lexer, Kind};
 
+
+    macro_rules! token_eq {
+        ($lexer: ident, $value: expr, $kind: expr) => {
+            let token = $lexer.next().unwrap();
+            assert_eq!(token.value(), $value);
+            assert_eq!(token.kind(), $kind);
+        };
+    }
 
     #[test]
     fn test_lexer() {
@@ -260,19 +272,21 @@ mod test {
             {}
             ()
         ");
-        assert_eq!(lexer.next().unwrap().value(), "symbol");
-        assert_eq!(lexer.next().unwrap().value(), "double quoted");
-        assert_eq!(lexer.next().unwrap().value(), "char");
-        assert_eq!(lexer.next().unwrap().value(), "10.0");
-        assert_eq!(lexer.next().unwrap().value(), "0xff");
-        assert_eq!(lexer.next().unwrap().value(), "128");
-        assert_eq!(lexer.next().unwrap().value(), "5");
-        assert_eq!(lexer.next().unwrap().value(), "usize");
-        assert_eq!(lexer.next().unwrap().value(), "{");
-        assert_eq!(lexer.next().unwrap().value(), "}");
-        assert_eq!(lexer.next().unwrap().value(), "(");
-        assert_eq!(lexer.next().unwrap().value(), ")");
+
+        token_eq!(lexer, "symbol", Kind::Symbol);
+        token_eq!(lexer, "double quoted", Kind::Str);
+        token_eq!(lexer, "char", Kind::Char);
+        token_eq!(lexer, "10.0", Kind::Number);
+        token_eq!(lexer, "0xff", Kind::Number);
+        token_eq!(lexer, "128", Kind::Number);
+        token_eq!(lexer, "5", Kind::Number);
+        token_eq!(lexer, "usize", Kind::Symbol);
+        token_eq!(lexer, "{", Kind::Syntax);
+        token_eq!(lexer, "}", Kind::Syntax);
+        token_eq!(lexer, "(", Kind::Syntax);
+        token_eq!(lexer, ")", Kind::Syntax);
     }
+
     #[test]
     fn test_lang() {
         let mut lexer = Lexer::new("
@@ -280,16 +294,30 @@ mod test {
                 value: T,
             }
         ");
-        assert_eq!(lexer.next().unwrap().value(), "pub");
-        assert_eq!(lexer.next().unwrap().value(), "struct");
-        assert_eq!(lexer.next().unwrap().value(), "Type");
-        assert_eq!(lexer.next().unwrap().value(), "<");
-        assert_eq!(lexer.next().unwrap().value(), "T");
-        assert_eq!(lexer.next().unwrap().value(), ">");
-        assert_eq!(lexer.next().unwrap().value(), "{");
-        assert_eq!(lexer.next().unwrap().value(), "value");
-        assert_eq!(lexer.next().unwrap().value(), ":");
-        assert_eq!(lexer.next().unwrap().value(), "T");
-        assert_eq!(lexer.next().unwrap().value(), "}");
+        token_eq!(lexer, "pub", Kind::Symbol);
+        token_eq!(lexer, "struct", Kind::Symbol);
+        token_eq!(lexer, "Type", Kind::Symbol);
+        token_eq!(lexer, "<", Kind::Syntax);
+        token_eq!(lexer, "T", Kind::Symbol);
+        token_eq!(lexer, ">", Kind::Syntax);
+        token_eq!(lexer, "{", Kind::Syntax);
+        token_eq!(lexer, "value", Kind::Symbol);
+        token_eq!(lexer, ":", Kind::Syntax);
+        token_eq!(lexer, "T", Kind::Symbol);
+        token_eq!(lexer, "}", Kind::Syntax);
+    }
+
+    #[test]
+    fn test_value_and_kind() {
+        let mut lexer = Lexer::new("(add ... 1 2)");
+
+        token_eq!(lexer, "(", Kind::Syntax);
+        token_eq!(lexer, "add", Kind::Symbol);
+        token_eq!(lexer, ".", Kind::Syntax);
+        token_eq!(lexer, ".", Kind::Syntax);
+        token_eq!(lexer, ".", Kind::Syntax);
+        token_eq!(lexer, "1", Kind::Number);
+        token_eq!(lexer, "2", Kind::Number);
+        token_eq!(lexer, ")", Kind::Syntax);
     }
 }
