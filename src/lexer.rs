@@ -131,7 +131,7 @@ impl Lexer {
         }
 
         let kind = if quote == '\'' {
-            Kind::Char
+            Kind::Chr
         } else {
             Kind::Str
         };
@@ -181,7 +181,7 @@ impl Lexer {
             }
         }
 
-        Token::new(string, Kind::Number, start_index, row, column)
+        Token::new(string, Kind::Num, start_index, row, column)
     }
 
     fn read_symbol(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
@@ -204,13 +204,13 @@ impl Lexer {
             }
         }
 
-        Token::new(string, Kind::Symbol, start_index, row, column)
+        Token::new(string, Kind::Sym, start_index, row, column)
     }
 
     fn read_syntax(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut string = String::new();
         string.push(ch);
-        Token::new(string, Kind::Syntax, start_index, row, column)
+        Token::new(string, Kind::Syn, start_index, row, column)
     }
 
     #[inline]
@@ -263,18 +263,18 @@ mod test {
             ()
         ");
 
-        token_eq!(lexer, "symbol", Kind::Symbol);
+        token_eq!(lexer, "symbol", Kind::Sym);
         token_eq!(lexer, "double quoted", Kind::Str);
-        token_eq!(lexer, "char", Kind::Char);
-        token_eq!(lexer, "10.0", Kind::Number);
-        token_eq!(lexer, "0xff", Kind::Number);
-        token_eq!(lexer, "128", Kind::Number);
-        token_eq!(lexer, "5", Kind::Number);
-        token_eq!(lexer, "usize", Kind::Symbol);
-        token_eq!(lexer, "{", Kind::Syntax);
-        token_eq!(lexer, "}", Kind::Syntax);
-        token_eq!(lexer, "(", Kind::Syntax);
-        token_eq!(lexer, ")", Kind::Syntax);
+        token_eq!(lexer, "char", Kind::Chr);
+        token_eq!(lexer, "10.0", Kind::Num);
+        token_eq!(lexer, "0xff", Kind::Num);
+        token_eq!(lexer, "128", Kind::Num);
+        token_eq!(lexer, "5", Kind::Num);
+        token_eq!(lexer, "usize", Kind::Sym);
+        token_eq!(lexer, "{", Kind::Syn);
+        token_eq!(lexer, "}", Kind::Syn);
+        token_eq!(lexer, "(", Kind::Syn);
+        token_eq!(lexer, ")", Kind::Syn);
     }
 
     #[test]
@@ -284,30 +284,30 @@ mod test {
                 value: T,
             }
         ");
-        token_eq!(lexer, "pub", Kind::Symbol);
-        token_eq!(lexer, "struct", Kind::Symbol);
-        token_eq!(lexer, "Type", Kind::Symbol);
-        token_eq!(lexer, "<", Kind::Syntax);
-        token_eq!(lexer, "T", Kind::Symbol);
-        token_eq!(lexer, ">", Kind::Syntax);
-        token_eq!(lexer, "{", Kind::Syntax);
-        token_eq!(lexer, "value", Kind::Symbol);
-        token_eq!(lexer, ":", Kind::Syntax);
-        token_eq!(lexer, "T", Kind::Symbol);
-        token_eq!(lexer, "}", Kind::Syntax);
+        token_eq!(lexer, "pub", Kind::Sym);
+        token_eq!(lexer, "struct", Kind::Sym);
+        token_eq!(lexer, "Type", Kind::Sym);
+        token_eq!(lexer, "<", Kind::Syn);
+        token_eq!(lexer, "T", Kind::Sym);
+        token_eq!(lexer, ">", Kind::Syn);
+        token_eq!(lexer, "{", Kind::Syn);
+        token_eq!(lexer, "value", Kind::Sym);
+        token_eq!(lexer, ":", Kind::Syn);
+        token_eq!(lexer, "T", Kind::Sym);
+        token_eq!(lexer, "}", Kind::Syn);
     }
 
     #[test]
     fn test_value_and_kind() {
         let mut lexer = Lexer::new("(add ... 1 2)");
 
-        token_eq!(lexer, "(", Kind::Syntax);
-        token_eq!(lexer, "add", Kind::Symbol);
-        token_eq!(lexer, ".", Kind::Syntax);
-        token_eq!(lexer, ".", Kind::Syntax);
-        token_eq!(lexer, ".", Kind::Syntax);
-        token_eq!(lexer, "1", Kind::Number);
-        token_eq!(lexer, "2", Kind::Number);
-        token_eq!(lexer, ")", Kind::Syntax);
+        token_eq!(lexer, "(", Kind::Syn);
+        token_eq!(lexer, "add", Kind::Sym);
+        token_eq!(lexer, ".", Kind::Syn);
+        token_eq!(lexer, ".", Kind::Syn);
+        token_eq!(lexer, ".", Kind::Syn);
+        token_eq!(lexer, "1", Kind::Num);
+        token_eq!(lexer, "2", Kind::Num);
+        token_eq!(lexer, ")", Kind::Syn);
     }
 }
