@@ -15,6 +15,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
+    #[inline]
     pub fn new(string: &str) -> Lexer {
         let chars: Vec<char> = string.chars().collect();
 
@@ -26,7 +27,7 @@ impl Lexer {
             chars: chars
         }
     }
-
+    #[inline]
     pub fn next_token(&mut self) -> Option<Token> {
         if self.index == self.length {
             None
@@ -53,11 +54,11 @@ impl Lexer {
             }
         }
     }
-
+    #[inline(always)]
     pub fn has_next_token(&self) -> bool {
         self.index < self.length - 1
     }
-
+    #[inline]
     fn read(&mut self) -> char {
         let ch = self.char_at(0);
 
@@ -74,17 +75,15 @@ impl Lexer {
 
         ch
     }
-
-    #[inline]
+    #[inline(always)]
     fn char_at(&self, index: usize) -> char {
-        self.chars.get(self.index + index).expect("unexpected end of input").clone()
+        *self.chars.get(self.index + index).expect("unexpected end of input")
     }
-
-    #[inline]
+    #[inline(always)]
     fn has_char_at(&self, index: usize) -> bool {
         (self.index + index) < self.length
     }
-
+    #[inline]
     fn read_size(&mut self, size: usize) -> String {
         let mut out = String::new();
 
@@ -94,7 +93,7 @@ impl Lexer {
 
         out
     }
-
+    #[inline]
     fn read_quoted(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let quote = ch;
         let mut index = self.index;
@@ -138,7 +137,7 @@ impl Lexer {
 
         Token::new(string, kind, start_index, row, column)
     }
-
+    #[inline]
     fn read_number(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut index = self.index;
         let mut parsed_period = false;
@@ -183,7 +182,7 @@ impl Lexer {
 
         Token::new(string, Kind::Num, start_index, row, column)
     }
-
+    #[inline]
     fn read_symbol(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut index = self.index;
         let mut string = String::new();
@@ -206,13 +205,12 @@ impl Lexer {
 
         Token::new(string, Kind::Sym, start_index, row, column)
     }
-
+    #[inline]
     fn read_syntax(&mut self, ch: char, start_index: usize, row: usize, column: usize) -> Token {
         let mut string = String::new();
         string.push(ch);
         Token::new(string, Kind::Syn, start_index, row, column)
     }
-
     #[inline]
     fn escape_char(ch: char) -> char {
         match ch {
@@ -232,82 +230,5 @@ impl Iterator for Lexer {
     #[inline(always)]
     fn next(&mut self) -> Option<Token> {
         self.next_token()
-    }
-}
-
-
-#[cfg(test)]
-mod test {
-    use super::{Lexer, Kind};
-
-
-    macro_rules! token_eq {
-        ($lexer: ident, $value: expr, $kind: expr) => {
-            let token = $lexer.next().unwrap();
-            assert_eq!(token.value(), $value);
-            assert_eq!(token.kind(), $kind);
-        };
-    }
-
-    #[test]
-    fn test_lexer() {
-        let mut lexer = Lexer::new("
-            symbol
-            \"double quoted\"
-            'char'
-            10.0
-            0xff
-            128
-            5usize
-            {}
-            ()
-        ");
-
-        token_eq!(lexer, "symbol", Kind::Sym);
-        token_eq!(lexer, "double quoted", Kind::Str);
-        token_eq!(lexer, "char", Kind::Chr);
-        token_eq!(lexer, "10.0", Kind::Num);
-        token_eq!(lexer, "0xff", Kind::Num);
-        token_eq!(lexer, "128", Kind::Num);
-        token_eq!(lexer, "5", Kind::Num);
-        token_eq!(lexer, "usize", Kind::Sym);
-        token_eq!(lexer, "{", Kind::Syn);
-        token_eq!(lexer, "}", Kind::Syn);
-        token_eq!(lexer, "(", Kind::Syn);
-        token_eq!(lexer, ")", Kind::Syn);
-    }
-
-    #[test]
-    fn test_lang() {
-        let mut lexer = Lexer::new("
-            pub struct Type<T> {
-                value: T,
-            }
-        ");
-        token_eq!(lexer, "pub", Kind::Sym);
-        token_eq!(lexer, "struct", Kind::Sym);
-        token_eq!(lexer, "Type", Kind::Sym);
-        token_eq!(lexer, "<", Kind::Syn);
-        token_eq!(lexer, "T", Kind::Sym);
-        token_eq!(lexer, ">", Kind::Syn);
-        token_eq!(lexer, "{", Kind::Syn);
-        token_eq!(lexer, "value", Kind::Sym);
-        token_eq!(lexer, ":", Kind::Syn);
-        token_eq!(lexer, "T", Kind::Sym);
-        token_eq!(lexer, "}", Kind::Syn);
-    }
-
-    #[test]
-    fn test_value_and_kind() {
-        let mut lexer = Lexer::new("(add ... 1 2)");
-
-        token_eq!(lexer, "(", Kind::Syn);
-        token_eq!(lexer, "add", Kind::Sym);
-        token_eq!(lexer, ".", Kind::Syn);
-        token_eq!(lexer, ".", Kind::Syn);
-        token_eq!(lexer, ".", Kind::Syn);
-        token_eq!(lexer, "1", Kind::Num);
-        token_eq!(lexer, "2", Kind::Num);
-        token_eq!(lexer, ")", Kind::Syn);
     }
 }

@@ -23,10 +23,24 @@ impl Token {
             column: column,
         }
     }
-
-    pub fn kind(&self) -> Kind { self.kind }
-    pub fn value(&self) -> &String { &self.value }
-    pub fn index(&self) -> usize { self.index }
-    pub fn row(&self) -> usize { self.row }
-    pub fn column(&self) -> usize { self.column }
+    #[inline(always)]
+    pub fn kind(&self) -> Kind {
+        self.kind
+    }
+    #[inline(always)]
+    pub fn value(&self) -> &String {
+        &self.value
+    }
+    #[inline(always)]
+    pub fn index(&self) -> usize {
+        self.index
+    }
+    #[inline(always)]
+    pub fn row(&self) -> usize {
+        self.row
+    }
+    #[inline(always)]
+    pub fn column(&self) -> usize {
+        self.column
+    }
 }
