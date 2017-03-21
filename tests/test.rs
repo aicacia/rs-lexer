@@ -1,75 +1,135 @@
 extern crate lexer;
 
 
-use lexer::{Lexer, Kind};
+use lexer::*;
 
 
-macro_rules! token_eq {
-    ($lexer: ident, $value: expr, $kind: expr) => {
-        let token = $lexer.next().unwrap();
-        assert_eq!(token.value(), $value);
-        assert_eq!(token.kind(), $kind);
-    };
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum TokenKind {
+    WHITESPACE,
+    IDENTIFIER,
 }
 
-#[test]
-fn test_lexer() {
-    let mut lexer = Lexer::new("
-        symbol
-        \"double quoted\"
-        'char'
-        10.0
-        0xff
-        128
-        5usize
-        {}
-        ()
-    ");
 
-    token_eq!(lexer, "symbol", Kind::Sym);
-    token_eq!(lexer, "double quoted", Kind::Str);
-    token_eq!(lexer, "char", Kind::Chr);
-    token_eq!(lexer, "10.0", Kind::Num);
-    token_eq!(lexer, "0xff", Kind::Num);
-    token_eq!(lexer, "128", Kind::Num);
-    token_eq!(lexer, "5", Kind::Num);
-    token_eq!(lexer, "usize", Kind::Sym);
-    token_eq!(lexer, "{", Kind::Syn);
-    token_eq!(lexer, "}", Kind::Syn);
-    token_eq!(lexer, "(", Kind::Syn);
-    token_eq!(lexer, ")", Kind::Syn);
-}
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct WhitespaceReader;
 
-#[test]
-fn test_lang() {
-    let mut lexer = Lexer::new("
-        pub struct Type<T> {
-            value: T,
+impl Reader<TokenKind> for WhitespaceReader {
+    fn read(&self, lexer: &Lexer<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = lexer.read(state);
+
+        if ch.is_whitespace() {
+            let mut string = String::new();
+
+            string.push(ch);
+
+            while !state.done() {
+                let ch = lexer.char_at(state, 0);
+
+                if ch.is_whitespace() {
+                    lexer.read(state);
+                    string.push(ch);
+                } else {
+                    break;
+                }
+            }
+
+            Some(Token::new(
+                lexer.meta(state),
+                TokenKind::WHITESPACE,
+                string
+            ))
+        } else {
+            None
         }
-    ");
-    token_eq!(lexer, "pub", Kind::Sym);
-    token_eq!(lexer, "struct", Kind::Sym);
-    token_eq!(lexer, "Type", Kind::Sym);
-    token_eq!(lexer, "<", Kind::Syn);
-    token_eq!(lexer, "T", Kind::Sym);
-    token_eq!(lexer, ">", Kind::Syn);
-    token_eq!(lexer, "{", Kind::Syn);
-    token_eq!(lexer, "value", Kind::Sym);
-    token_eq!(lexer, ":", Kind::Syn);
-    token_eq!(lexer, "T", Kind::Sym);
-    token_eq!(lexer, "}", Kind::Syn);
+    }
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        1usize
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct IdentifierReader;
+
+impl Reader<TokenKind> for IdentifierReader {
+    fn read(&self, lexer: &Lexer<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = lexer.read(state);
+
+        if ch.is_alphabetic() {
+            let mut string = String::new();
+
+            string.push(ch);
+
+            while !state.done() {
+                let ch = lexer.char_at(state, 0);
+
+                if ch.is_alphanumeric() {
+                    lexer.read(state);
+                    string.push(ch);
+                } else {
+                    break;
+                }
+            }
+
+            Some(Token::new(
+                lexer.meta(state),
+                TokenKind::IDENTIFIER,
+                string
+            ))
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        0usize
+    }
+}
+
+
+#[test]
+fn test_lexer_whitespace() {
+    let mut lexer = Lexer::<TokenKind>::from("   \n\t   ");
+
+    lexer
+        .add_reader(WhitespaceReader)
+        .add_reader(IdentifierReader)
+        .sort_readers();
+
+    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+
+    assert_eq!(tokens.len(), 1);
+
+    let ws_token = &tokens[0];
+    assert_eq!(ws_token.kind(), &TokenKind::WHITESPACE);
+    assert_eq!(ws_token.meta().col_start(), 1);
+    assert_eq!(ws_token.meta().col_end(), 5);
+    assert_eq!(ws_token.meta().line_start(), 1);
+    assert_eq!(ws_token.meta().line_end(), 2);
+    assert_eq!(ws_token.value().len(), 8);
 }
 
 #[test]
-fn test_value_and_kind() {
-    let mut lexer = Lexer::new("(add ... 1 2)");
+fn test_lexer_identifier() {
+    let mut lexer = Lexer::<TokenKind>::from("def name");
 
-    token_eq!(lexer, "(", Kind::Syn);
-    token_eq!(lexer, "add", Kind::Sym);
-    token_eq!(lexer, ".", Kind::Syn);
-    token_eq!(lexer, ".", Kind::Syn);
-    token_eq!(lexer, ".", Kind::Syn);
-    token_eq!(lexer, "1", Kind::Num);
-    token_eq!(lexer, "2", Kind::Num);
-    token_eq!(lexer, ")", Kind::Syn);
+    lexer
+        .add_reader(WhitespaceReader)
+        .add_reader(IdentifierReader)
+        .sort_readers();
+
+    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+
+    assert_eq!(tokens.len(), 3);
+
+    let ident_token = &tokens[0];
+    assert_eq!(ident_token.kind(), &TokenKind::IDENTIFIER);
+    assert_eq!(ident_token.meta().col_start(), 1);
+    assert_eq!(ident_token.meta().col_end(), 3);
+    assert_eq!(ident_token.meta().line_start(), 1);
+    assert_eq!(ident_token.meta().line_end(), 1);
+    assert_eq!(ident_token.value(), &"def");
+    assert_eq!(ident_token.value().len(), 3);
 }

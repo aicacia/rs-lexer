@@ -1,15 +1,10 @@
-#![feature(collections)]
-#![no_std]
-
-
-extern crate collections;
-
-
-mod kind;
 mod lexer;
+mod reader;
+mod state;
 mod token;
 
 
-pub use self::kind::Kind;
-pub use self::lexer::Lexer;
-pub use self::token::Token;
+pub use lexer::Lexer;
+pub use reader::Reader;
+pub use state::State;
+pub use token::{Token, TokenMeta};
