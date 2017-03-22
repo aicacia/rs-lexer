@@ -7,26 +7,26 @@ use super::readers::Readers;
 use super::token::Token;
 
 
-pub struct LexicalReader<T>
+pub struct Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
     pub readers: Readers<T>,
     pub input: Input,
 }
 
-impl<'a, T> From<&'a str> for LexicalReader<T>
+impl<'a, T> From<&'a str> for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
     #[inline]
     fn from(value: &'a str) -> Self {
-        LexicalReader {
+        Lexer {
             readers: Readers::new(),
             input: From::from(value),
         }
     }
 }
 
-impl<'a, T> From<&'a String> for LexicalReader<T>
+impl<'a, T> From<&'a String> for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
     #[inline]
@@ -35,7 +35,7 @@ impl<'a, T> From<&'a String> for LexicalReader<T>
     }
 }
 
-impl<'a, R, T> From<&'a mut R> for LexicalReader<T>
+impl<'a, R, T> From<&'a mut R> for Lexer<T>
     where R: Read,
           T: Clone + Eq + PartialEq + Hash
 {
@@ -47,7 +47,7 @@ impl<'a, R, T> From<&'a mut R> for LexicalReader<T>
     }
 }
 
-impl<T> Iterator for LexicalReader<T>
+impl<T> Iterator for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
     type Item = Token<T>;

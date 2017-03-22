@@ -26,7 +26,7 @@ impl State {
     }
 
     #[inline(always)]
-    pub fn has(&self, offset: usize) -> bool {
+    pub fn has_char_at(&self, offset: usize) -> bool {
         (self.index + offset) < self.len
     }
 }

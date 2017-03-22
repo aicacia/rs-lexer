@@ -56,7 +56,14 @@ impl Input {
 
     #[inline(always)]
     pub fn new_state_meta(&self, state: &State) -> TokenMeta {
-        TokenMeta::new(self.state.col, state.col, self.state.row, state.row)
+        TokenMeta::new(
+            self.state.index as u64,
+            state.index as u64,
+            self.state.col,
+            state.col,
+            self.state.row,
+            state.row
+        )
     }
 
     pub fn read(&self, state: &mut State) -> char {
@@ -75,7 +82,7 @@ impl Input {
 
     #[inline(always)]
     pub fn has_char_at(&self, state: &State, offset: usize) -> bool {
-        state.has(offset)
+        state.has_char_at(offset)
     }
 
     #[inline(always)]

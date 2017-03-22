@@ -4,6 +4,8 @@ use std::hash::Hash;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct TokenMeta {
+    index_start: u64,
+    index_end: u64,
     col_start: u64,
     col_end: u64,
     line_start: u64,
@@ -13,6 +15,8 @@ pub struct TokenMeta {
 impl TokenMeta {
 
     pub fn new(
+        index_start: u64,
+        index_end: u64,
         col_start: u64,
         col_end: u64,
         line_start: u64,
@@ -23,6 +27,8 @@ impl TokenMeta {
         }
 
         TokenMeta {
+            index_start: index_start,
+            index_end: index_end,
             col_start: col_start,
             col_end: col_end,
             line_start: line_start,
@@ -31,13 +37,24 @@ impl TokenMeta {
     }
 
     #[inline(always)]
+    pub fn index_start(&self) -> u64 { self.index_start }
+    #[inline(always)]
+    pub fn index_end(&self) -> u64 { self.index_end }
+
+    #[inline(always)]
     pub fn col_start(&self) -> u64 { self.col_start }
     #[inline(always)]
     pub fn col_end(&self) -> u64 { self.col_end }
+
     #[inline(always)]
     pub fn line_start(&self) -> u64 { self.line_start }
     #[inline(always)]
     pub fn line_end(&self) -> u64 { self.line_end }
+
+    #[inline]
+    pub fn len(&self) -> u64 {
+        self.index_end - self.index_start
+    }
 
     #[inline]
     pub fn line_count(&self) -> u64 {
@@ -65,11 +82,11 @@ impl<T> Token<T>
 {
 
     #[inline]
-    pub fn new(meta: TokenMeta, kind: T, val: String) -> Self {
+    pub fn new(meta: TokenMeta, kind: T, value: String) -> Self {
         Token {
             meta: meta,
             kind: kind,
-            value: val,
+            value: value,
         }
     }
 

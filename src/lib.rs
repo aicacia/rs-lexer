@@ -1,5 +1,5 @@
 mod input;
-mod lexical_reader;
+mod lexer;
 mod reader;
 mod readers;
 mod state;
@@ -7,7 +7,7 @@ mod token;
 
 
 pub use input::Input;
-pub use lexical_reader::LexicalReader;
+pub use lexer::Lexer;
 pub use reader::Reader;
 pub use readers::Readers;
 pub use state::State;

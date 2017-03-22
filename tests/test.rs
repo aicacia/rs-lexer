@@ -1,7 +1,7 @@
-extern crate lexical_reader;
+extern crate lexer;
 
 
-use lexical_reader::*;
+use lexer::*;
 
 
 #[allow(non_camel_case_types)]
@@ -16,6 +16,12 @@ pub enum TokenKind {
 pub struct WhitespaceReader;
 
 impl Reader<TokenKind> for WhitespaceReader {
+    
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        1usize
+    }
+
     fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
         let ch = input.read(state);
 
@@ -44,16 +50,18 @@ impl Reader<TokenKind> for WhitespaceReader {
             None
         }
     }
-    #[inline(always)]
-    fn priority(&self) -> usize {
-        1usize
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct IdentifierReader;
 
 impl Reader<TokenKind> for IdentifierReader {
+
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        0usize
+    }
+
     fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
         let ch = input.read(state);
 
@@ -82,16 +90,12 @@ impl Reader<TokenKind> for IdentifierReader {
             None
         }
     }
-    #[inline(always)]
-    fn priority(&self) -> usize {
-        0usize
-    }
 }
 
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexer = LexicalReader::<TokenKind>::from("   \n\t   ");
+    let mut lexer = Lexer::<TokenKind>::from("   \n\t   ");
 
     lexer.readers
         .add(WhitespaceReader)
@@ -106,14 +110,17 @@ fn test_lexer_whitespace() {
     assert_eq!(ws_token.kind(), &TokenKind::WHITESPACE);
     assert_eq!(ws_token.meta().col_start(), 1);
     assert_eq!(ws_token.meta().col_end(), 5);
+    assert_eq!(ws_token.meta().col_count(), 5);
     assert_eq!(ws_token.meta().line_start(), 1);
     assert_eq!(ws_token.meta().line_end(), 2);
+    assert_eq!(ws_token.meta().line_count(), 2);
+    assert_eq!(ws_token.meta().len(), 8);
     assert_eq!(ws_token.value().len(), 8);
 }
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexer = LexicalReader::<TokenKind>::from("def name");
+    let mut lexer = Lexer::<TokenKind>::from("def name");
 
     lexer.readers
         .add(WhitespaceReader)
@@ -128,8 +135,11 @@ fn test_lexer_identifier() {
     assert_eq!(ident_token.kind(), &TokenKind::IDENTIFIER);
     assert_eq!(ident_token.meta().col_start(), 1);
     assert_eq!(ident_token.meta().col_end(), 3);
+    assert_eq!(ident_token.meta().col_count(), 3);
     assert_eq!(ident_token.meta().line_start(), 1);
     assert_eq!(ident_token.meta().line_end(), 1);
-    assert_eq!(ident_token.value(), &"def");
+    assert_eq!(ident_token.meta().line_count(), 1);
+    assert_eq!(ident_token.value(), "def");
+    assert_eq!(ident_token.meta().len(), 3);
     assert_eq!(ident_token.value().len(), 3);
 }
