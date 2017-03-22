@@ -2,7 +2,7 @@ use std::io::Read;
 use std::convert::From;
 use std::ops::Deref;
 
-use super::state::{state_read, State};
+use super::state::{state_read, state_update, State};
 use super::token::TokenMeta;
 
 
@@ -57,15 +57,16 @@ impl Input {
     #[inline(always)]
     pub fn new_state_meta(&self, state: &State) -> TokenMeta {
         TokenMeta::new(
-            self.state.index as u64,
-            state.index as u64,
-            self.state.col,
-            state.col,
-            self.state.row,
-            state.row
+            self.state.index() as u64,
+            state.index() as u64,
+            self.state.col(),
+            state.col(),
+            self.state.row(),
+            state.row()
         )
     }
 
+    #[inline]
     pub fn read(&self, state: &mut State) -> char {
         let mut is_newline = false;
 
@@ -81,21 +82,24 @@ impl Input {
     }
 
     #[inline(always)]
+    pub fn done(&self, state: &State) -> bool {
+        state.index() >= self.input.len()
+    }
+
+    #[inline(always)]
     pub fn has_char_at(&self, state: &State, offset: usize) -> bool {
-        state.has_char_at(offset)
+        (state.index() + offset) < self.input.len()
     }
 
     #[inline(always)]
     pub fn char_at(&self, state: &State, offset: usize) -> char {
         unsafe {
-            *self.input.get_unchecked(state.index + offset)
+            *self.input.get_unchecked(state.index() + offset)
         }
     }
 }
 
-#[inline]
+#[inline(always)]
 pub fn input_update<'a>(input: &'a mut Input, state: &State) {
-    input.state.col = state.col;
-    input.state.row = state.row;
-    input.state.index = state.index;
+    state_update(&mut input.state, state);
 }

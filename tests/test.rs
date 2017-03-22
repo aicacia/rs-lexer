@@ -16,7 +16,7 @@ pub enum TokenKind {
 pub struct WhitespaceReader;
 
 impl Reader<TokenKind> for WhitespaceReader {
-    
+
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
@@ -30,7 +30,7 @@ impl Reader<TokenKind> for WhitespaceReader {
 
             string.push(ch);
 
-            while !state.done() {
+            while !input.done(state) {
                 let ch = input.char_at(state, 0);
 
                 if ch.is_whitespace() {
@@ -70,7 +70,7 @@ impl Reader<TokenKind> for IdentifierReader {
 
             string.push(ch);
 
-            while !state.done() {
+            while !input.done(state) {
                 let ch = input.char_at(state, 0);
 
                 if ch.is_alphanumeric() {

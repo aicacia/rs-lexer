@@ -2,9 +2,9 @@
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct State {
-    pub index: usize,
-    pub row: u64,
-    pub col: u64,
+    index: usize,
+    row: u64,
+    col: u64,
     len: usize,
 }
 
@@ -21,14 +21,13 @@ impl State {
     }
 
     #[inline(always)]
-    pub fn done(&self) -> bool {
-        self.index >= self.len
-    }
-
+    pub fn index(&self) -> usize { self.index }
     #[inline(always)]
-    pub fn has_char_at(&self, offset: usize) -> bool {
-        (self.index + offset) < self.len
-    }
+    pub fn row(&self) -> u64 { self.row }
+    #[inline(always)]
+    pub fn col(&self) -> u64 { self.col }
+    #[inline(always)]
+    pub fn len(&self) -> usize { self.len }
 }
 
 pub fn state_read<'a>(state: &'a mut State, is_newline: bool) {
@@ -42,4 +41,11 @@ pub fn state_read<'a>(state: &'a mut State, is_newline: bool) {
     if state.index < state.len {
         state.index += 1;
     }
+}
+
+#[inline]
+pub fn state_update<'a>(state: &'a mut State, other: &State) {
+    state.index = other.index;
+    state.row = other.row;
+    state.col = other.col;
 }

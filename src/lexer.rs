@@ -17,7 +17,7 @@ pub struct Lexer<T>
 impl<'a, T> From<&'a str> for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
-    #[inline]
+    #[inline(always)]
     fn from(value: &'a str) -> Self {
         Lexer {
             readers: Readers::new(),
@@ -29,7 +29,7 @@ impl<'a, T> From<&'a str> for Lexer<T>
 impl<'a, T> From<&'a String> for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
-    #[inline]
+    #[inline(always)]
     fn from(value: &'a String) -> Self {
         From::from(value.as_str())
     }
@@ -54,7 +54,7 @@ impl<T> Iterator for Lexer<T>
 
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.input.state().done() {
+        if self.input.done(self.input.state()) {
             None
         } else {
             let mut token = None;
