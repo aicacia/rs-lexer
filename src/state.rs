@@ -27,7 +27,7 @@ impl State {
 
     #[inline(always)]
     pub fn has(&self, offset: usize) -> bool {
-        self.index + offset < self.len
+        (self.index + offset) < self.len
     }
 }
 

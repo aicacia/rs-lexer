@@ -86,7 +86,7 @@ impl<T> Token<T>
     }
 }
 
-impl<T> fmt::Display for Token<T> 
+impl<T> fmt::Debug for Token<T>
     where T: Debug + Clone + Eq + PartialEq + Hash
 {
     #[inline]
@@ -94,8 +94,9 @@ impl<T> fmt::Display for Token<T>
         write!(f, "{}", {
             let m = &self.meta;
 
-            format!("<{:?} ls=({}) lc=({}) cols=({},{})>",
+            format!("<{:?} {:?} ls=({}) lc=({}) cols=({},{})>",
                 self.kind,
+                self.value,
                 m.line_start,
                 m.line_count(),
                 m.col_start,
