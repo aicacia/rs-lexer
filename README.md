@@ -1,4 +1,4 @@
-lexer [![Build Status](https://travis-ci.org/nathanfaucett/rs-lexer.svg?branch=master)](https://travis-ci.org/nathanfaucett/rs-lexer)
+lexical_reader [![Build Status](https://travis-ci.org/nathanfaucett/rs-lexical_reader.svg?branch=master)](https://travis-ci.org/nathanfaucett/rs-lexical_reader)
 =====
 
-plugin based lexer
+plugin based lexical reader

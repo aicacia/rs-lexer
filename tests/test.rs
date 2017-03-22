@@ -1,7 +1,7 @@
-extern crate lexer;
+extern crate lexical_reader;
 
 
-use lexer::*;
+use lexical_reader::*;
 
 
 #[allow(non_camel_case_types)]
@@ -16,8 +16,8 @@ pub enum TokenKind {
 pub struct WhitespaceReader;
 
 impl Reader<TokenKind> for WhitespaceReader {
-    fn read(&self, lexer: &Lexer<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = lexer.read(state);
+    fn read(&self, lexical_reader: &LexicalReader<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = lexical_reader.read(state);
 
         if ch.is_whitespace() {
             let mut string = String::new();
@@ -25,10 +25,10 @@ impl Reader<TokenKind> for WhitespaceReader {
             string.push(ch);
 
             while !state.done() {
-                let ch = lexer.char_at(state, 0);
+                let ch = lexical_reader.char_at(state, 0);
 
                 if ch.is_whitespace() {
-                    lexer.read(state);
+                    lexical_reader.read(state);
                     string.push(ch);
                 } else {
                     break;
@@ -36,7 +36,7 @@ impl Reader<TokenKind> for WhitespaceReader {
             }
 
             Some(Token::new(
-                lexer.meta(state),
+                lexical_reader.meta(state),
                 TokenKind::WHITESPACE,
                 string
             ))
@@ -54,8 +54,8 @@ impl Reader<TokenKind> for WhitespaceReader {
 pub struct IdentifierReader;
 
 impl Reader<TokenKind> for IdentifierReader {
-    fn read(&self, lexer: &Lexer<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = lexer.read(state);
+    fn read(&self, lexical_reader: &LexicalReader<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = lexical_reader.read(state);
 
         if ch.is_alphabetic() {
             let mut string = String::new();
@@ -63,10 +63,10 @@ impl Reader<TokenKind> for IdentifierReader {
             string.push(ch);
 
             while !state.done() {
-                let ch = lexer.char_at(state, 0);
+                let ch = lexical_reader.char_at(state, 0);
 
                 if ch.is_alphanumeric() {
-                    lexer.read(state);
+                    lexical_reader.read(state);
                     string.push(ch);
                 } else {
                     break;
@@ -74,7 +74,7 @@ impl Reader<TokenKind> for IdentifierReader {
             }
 
             Some(Token::new(
-                lexer.meta(state),
+                lexical_reader.meta(state),
                 TokenKind::IDENTIFIER,
                 string
             ))
@@ -91,14 +91,14 @@ impl Reader<TokenKind> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexer = Lexer::<TokenKind>::from("   \n\t   ");
+    let mut lexical_reader = LexicalReader::<TokenKind>::from("   \n\t   ");
 
-    lexer
+    lexical_reader
         .add_reader(WhitespaceReader)
         .add_reader(IdentifierReader)
         .sort_readers();
 
-    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+    let tokens: Vec<Token<TokenKind>> = lexical_reader.collect();
 
     assert_eq!(tokens.len(), 1);
 
@@ -113,14 +113,14 @@ fn test_lexer_whitespace() {
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexer = Lexer::<TokenKind>::from("def name");
+    let mut lexical_reader = LexicalReader::<TokenKind>::from("def name");
 
-    lexer
+    lexical_reader
         .add_reader(WhitespaceReader)
         .add_reader(IdentifierReader)
         .sort_readers();
 
-    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+    let tokens: Vec<Token<TokenKind>> = lexical_reader.collect();
 
     assert_eq!(tokens.len(), 3);
 

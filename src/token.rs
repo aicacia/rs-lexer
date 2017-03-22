@@ -12,8 +12,12 @@ pub struct TokenMeta {
 
 impl TokenMeta {
 
-    pub fn new(col_start: u64, col_end: u64, line_start: u64, line_end: u64) -> Self {
-
+    pub fn new(
+        col_start: u64,
+        col_end: u64,
+        line_start: u64,
+        line_end: u64
+    ) -> Self {
         if line_end < line_start {
             panic!("meta error: start row cannot be less than the end row of a token.");
         }
@@ -48,13 +52,17 @@ impl TokenMeta {
 
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct Token<T: Clone + Eq + PartialEq + Hash> {
+pub struct Token<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
     kind: T,
     meta: TokenMeta,
     value: String,
 }
 
-impl<T: Clone + Eq + PartialEq + Hash> Token<T> {
+impl<T> Token<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
 
     #[inline]
     pub fn new(meta: TokenMeta, kind: T, val: String) -> Self {
@@ -78,7 +86,9 @@ impl<T: Clone + Eq + PartialEq + Hash> Token<T> {
     }
 }
 
-impl<T: Debug + Clone + Eq + PartialEq + Hash> fmt::Display for Token<T> {
+impl<T> fmt::Display for Token<T> 
+    where T: Debug + Clone + Eq + PartialEq + Hash
+{
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", {

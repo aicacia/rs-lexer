@@ -1,4 +1,4 @@
 [root]
-name = "lexer"
+name = "lexical_reader"
 version = "0.1.0"
 

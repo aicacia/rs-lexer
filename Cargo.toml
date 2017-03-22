@@ -1,14 +1,14 @@
 [package]
-name = "lexer"
+name = "lexical_reader"
 version = "0.1.0"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
-keywords = ["plugins", "plugin", "lexer"]
-description = "plugin based lexer"
+keywords = ["plugins", "plugin", "lexical", "reader"]
+description = "plugin based lexical reader"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/nathanfaucett/rs-lexer.git"
-homepage = "https://github.com/nathanfaucett/rs-lexer"
+repository = "https://github.com/nathanfaucett/rs-lexical_reader.git"
+homepage = "https://github.com/nathanfaucett/rs-lexical_reader"
 
 [dependencies]
 [dev-dependencies]

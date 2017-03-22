@@ -7,18 +7,22 @@ use super::state::{state_read, State};
 use super::token::{Token, TokenMeta};
 
 
-pub struct Lexer<T: Clone + Eq + PartialEq + Hash> {
+pub struct LexicalReader<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
     state: State,
     readers: Vec<Box<Reader<T>>>,
     input: Vec<char>,
 }
 
-impl<'a, T: Clone + Eq + PartialEq + Hash> From<&'a str> for Lexer<T> {
+impl<'a, T> From<&'a str> for LexicalReader<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
     #[inline]
     fn from(value: &'a str) -> Self {
         let input: Vec<char> = value.chars().collect();
 
-        Lexer {
+        LexicalReader {
             state: State::new(input.len()),
             readers: Vec::new(),
             input: input,
@@ -26,14 +30,19 @@ impl<'a, T: Clone + Eq + PartialEq + Hash> From<&'a str> for Lexer<T> {
     }
 }
 
-impl<'a, T: Clone + Eq + PartialEq + Hash> From<&'a String> for Lexer<T> {
+impl<'a, T> From<&'a String> for LexicalReader<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
     #[inline]
     fn from(value: &'a String) -> Self {
         From::from(value.as_str())
     }
 }
 
-impl<'a, R: Read, T: Clone + Eq + PartialEq + Hash> From<&'a mut R> for Lexer<T> {
+impl<'a, R, T> From<&'a mut R> for LexicalReader<T>
+    where R: Read,
+          T: Clone + Eq + PartialEq + Hash
+{
     #[inline]
     fn from(value: &'a mut R) -> Self {
         let mut string = String::new();
@@ -42,7 +51,9 @@ impl<'a, R: Read, T: Clone + Eq + PartialEq + Hash> From<&'a mut R> for Lexer<T>
     }
 }
 
-impl<T: Clone + Eq + PartialEq + Hash> Lexer<T> {
+impl<T> LexicalReader<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
 
     pub fn read(&self, state: &mut State) -> char {
         let mut is_newline = false;
@@ -104,7 +115,9 @@ impl<T: Clone + Eq + PartialEq + Hash> Lexer<T> {
     }
 }
 
-impl<T: Clone + Eq + PartialEq + Hash> Iterator for Lexer<T> {
+impl<T> Iterator for LexicalReader<T>
+    where T: Clone + Eq + PartialEq + Hash
+{
     type Item = Token<T>;
 
 
