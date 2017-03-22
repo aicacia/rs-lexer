@@ -2,17 +2,16 @@ use std::io::Read;
 use std::convert::From;
 use std::hash::Hash;
 
-use super::reader::Reader;
-use super::state::{state_read, State};
-use super::token::{Token, TokenMeta};
+use super::input::{input_update, Input};
+use super::readers::Readers;
+use super::token::Token;
 
 
 pub struct LexicalReader<T>
     where T: Clone + Eq + PartialEq + Hash
 {
-    state: State,
-    readers: Vec<Box<Reader<T>>>,
-    input: Vec<char>,
+    pub readers: Readers<T>,
+    pub input: Input,
 }
 
 impl<'a, T> From<&'a str> for LexicalReader<T>
@@ -20,12 +19,9 @@ impl<'a, T> From<&'a str> for LexicalReader<T>
 {
     #[inline]
     fn from(value: &'a str) -> Self {
-        let input: Vec<char> = value.chars().collect();
-
         LexicalReader {
-            state: State::new(input.len()),
-            readers: Vec::new(),
-            input: input,
+            readers: Readers::new(),
+            input: From::from(value),
         }
     }
 }
@@ -51,70 +47,6 @@ impl<'a, R, T> From<&'a mut R> for LexicalReader<T>
     }
 }
 
-impl<T> LexicalReader<T>
-    where T: Clone + Eq + PartialEq + Hash
-{
-
-    pub fn read(&self, state: &mut State) -> char {
-        let mut is_newline = false;
-
-        let ch = self.char_at(state, 0);
-
-        if ch == '\n' {
-            is_newline = true;
-        }
-
-        state_read(state, is_newline);
-
-        ch
-    }
-
-    #[inline(always)]
-    pub fn meta(&self, state: &State) -> TokenMeta {
-        TokenMeta::new(self.col(), state.col, self.row(), state.row)
-    }
-
-    #[inline]
-    pub fn add_reader<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
-        self.readers.push(Box::new(reader));
-        self
-    }
-
-    #[inline]
-    pub fn sort_readers(&mut self) -> &mut Self {
-        self.readers.sort_by(|a, b| a.priority().cmp(&b.priority()));
-        self
-    }
-
-    #[inline(always)]
-    pub fn state(&self) -> &State { &self.state }
-    #[inline(always)]
-    pub fn row(&self) -> u64 {self.state.row }
-    #[inline(always)]
-    pub fn col(&self) -> u64 {self.state.col }
-    #[inline(always)]
-    pub fn index(&self) -> usize {self.state.index }
-
-    #[inline(always)]
-    pub fn has_char_at(&self, state: &State, offset: usize) -> bool {
-        state.has(offset)
-    }
-
-    #[inline(always)]
-    pub fn char_at(&self, state: &State, offset: usize) -> char {
-        unsafe {
-            *self.input.get_unchecked(state.index + offset)
-        }
-    }
-
-    #[inline]
-    fn update(&mut self, state: &State) {
-        self.state.col = state.col;
-        self.state.row = state.row;
-        self.state.index = state.index;
-    }
-}
-
 impl<T> Iterator for LexicalReader<T>
     where T: Clone + Eq + PartialEq + Hash
 {
@@ -122,16 +54,16 @@ impl<T> Iterator for LexicalReader<T>
 
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.state.done() {
+        if self.input.state().done() {
             None
         } else {
             let mut token = None;
             let mut new_state = None;
 
             for reader in self.readers.iter() {
-                let mut state = self.state.clone();
+                let mut state = self.input.state().clone();
 
-                match reader.read(&self, &mut state) {
+                match reader.read(&self.input, &mut state) {
                     Some(t) => {
                         token = Some(t);
                         new_state = Some(state);
@@ -142,7 +74,7 @@ impl<T> Iterator for LexicalReader<T>
             }
 
             if let Some(ref state) = new_state {
-                self.update(state);
+                input_update(&mut self.input, state);
             }
 
             token

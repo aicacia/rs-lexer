@@ -16,8 +16,8 @@ pub enum TokenKind {
 pub struct WhitespaceReader;
 
 impl Reader<TokenKind> for WhitespaceReader {
-    fn read(&self, lexical_reader: &LexicalReader<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = lexical_reader.read(state);
+    fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = input.read(state);
 
         if ch.is_whitespace() {
             let mut string = String::new();
@@ -25,10 +25,10 @@ impl Reader<TokenKind> for WhitespaceReader {
             string.push(ch);
 
             while !state.done() {
-                let ch = lexical_reader.char_at(state, 0);
+                let ch = input.char_at(state, 0);
 
                 if ch.is_whitespace() {
-                    lexical_reader.read(state);
+                    input.read(state);
                     string.push(ch);
                 } else {
                     break;
@@ -36,7 +36,7 @@ impl Reader<TokenKind> for WhitespaceReader {
             }
 
             Some(Token::new(
-                lexical_reader.meta(state),
+                input.new_state_meta(state),
                 TokenKind::WHITESPACE,
                 string
             ))
@@ -54,8 +54,8 @@ impl Reader<TokenKind> for WhitespaceReader {
 pub struct IdentifierReader;
 
 impl Reader<TokenKind> for IdentifierReader {
-    fn read(&self, lexical_reader: &LexicalReader<TokenKind>, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = lexical_reader.read(state);
+    fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
+        let ch = input.read(state);
 
         if ch.is_alphabetic() {
             let mut string = String::new();
@@ -63,10 +63,10 @@ impl Reader<TokenKind> for IdentifierReader {
             string.push(ch);
 
             while !state.done() {
-                let ch = lexical_reader.char_at(state, 0);
+                let ch = input.char_at(state, 0);
 
                 if ch.is_alphanumeric() {
-                    lexical_reader.read(state);
+                    input.read(state);
                     string.push(ch);
                 } else {
                     break;
@@ -74,7 +74,7 @@ impl Reader<TokenKind> for IdentifierReader {
             }
 
             Some(Token::new(
-                lexical_reader.meta(state),
+                input.new_state_meta(state),
                 TokenKind::IDENTIFIER,
                 string
             ))
@@ -91,14 +91,14 @@ impl Reader<TokenKind> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexical_reader = LexicalReader::<TokenKind>::from("   \n\t   ");
+    let mut lexer = LexicalReader::<TokenKind>::from("   \n\t   ");
 
-    lexical_reader
-        .add_reader(WhitespaceReader)
-        .add_reader(IdentifierReader)
-        .sort_readers();
+    lexer.readers
+        .add(WhitespaceReader)
+        .add(IdentifierReader)
+        .sort();
 
-    let tokens: Vec<Token<TokenKind>> = lexical_reader.collect();
+    let tokens: Vec<Token<TokenKind>> = lexer.collect();
 
     assert_eq!(tokens.len(), 1);
 
@@ -113,14 +113,14 @@ fn test_lexer_whitespace() {
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexical_reader = LexicalReader::<TokenKind>::from("def name");
+    let mut lexer = LexicalReader::<TokenKind>::from("def name");
 
-    lexical_reader
-        .add_reader(WhitespaceReader)
-        .add_reader(IdentifierReader)
-        .sort_readers();
+    lexer.readers
+        .add(WhitespaceReader)
+        .add(IdentifierReader)
+        .sort();
 
-    let tokens: Vec<Token<TokenKind>> = lexical_reader.collect();
+    let tokens: Vec<Token<TokenKind>> = lexer.collect();
 
     assert_eq!(tokens.len(), 3);
 
