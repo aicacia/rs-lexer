@@ -1,5 +1,7 @@
-use std::fmt::{self, Debug};
-use std::hash::Hash;
+use collections::string::String;
+
+use core::fmt::{self, Debug};
+use core::hash::Hash;
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -13,7 +15,7 @@ pub struct TokenMeta {
 }
 
 impl TokenMeta {
-
+    #[inline]
     pub fn new(
         index_start: u64,
         index_end: u64,
@@ -22,9 +24,9 @@ impl TokenMeta {
         line_start: u64,
         line_end: u64
     ) -> Self {
-        if line_end < line_start {
-            panic!("meta error: start row cannot be less than the end row of a token.");
-        }
+        assert!(index_end > index_start, "token meta error: end index cannot be less than the start row of a token.");
+        assert!(col_end >= col_start, "token meta error: end col cannot be less than the start col of a token.");
+        assert!(line_end >= line_start, "token meta error: end line cannot be less than the start line of a token.");
 
         TokenMeta {
             index_start: index_start,
@@ -51,17 +53,17 @@ impl TokenMeta {
     #[inline(always)]
     pub fn line_end(&self) -> u64 { self.line_end }
 
-    #[inline]
+    #[inline(always)]
     pub fn len(&self) -> u64 {
         self.index_end - self.index_start
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn line_count(&self) -> u64 {
         (self.line_end - self.line_start) + 1
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn col_count(&self) -> u64 {
         (self.col_end - self.col_start) + 1
     }
@@ -81,7 +83,7 @@ impl<T> Token<T>
     where T: Clone + Eq + PartialEq + Hash
 {
 
-    #[inline]
+    #[inline(always)]
     pub fn new(meta: TokenMeta, kind: T, value: String) -> Self {
         Token {
             meta: meta,
@@ -97,7 +99,7 @@ impl<T> Token<T>
     #[inline(always)]
     pub fn value(&self) -> &String { &self.value }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_kind(&self, t: &T) -> bool {
         &self.kind == t
     }

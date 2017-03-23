@@ -1,6 +1,7 @@
-use std::io::Read;
-use std::convert::From;
-use std::ops::Deref;
+use collections::vec::Vec;
+
+use core::convert::From;
+use core::ops::Deref;
 
 use super::state::{state_read, state_update, State};
 use super::token::TokenMeta;
@@ -20,24 +21,6 @@ impl<'a> From<&'a str> for Input {
             state: State::new(input.len()),
             input: input,
         }
-    }
-}
-
-impl<'a> From<&'a String> for Input {
-    #[inline]
-    fn from(value: &'a String) -> Self {
-        From::from(value.as_str())
-    }
-}
-
-impl<'a, R> From<&'a mut R> for Input
-    where R: Read
-{
-    #[inline]
-    fn from(value: &'a mut R) -> Self {
-        let mut string = String::new();
-        value.read_to_string(&mut string).expect("failed to read value");
-        From::from(string.as_str())
     }
 }
 

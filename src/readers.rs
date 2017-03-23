@@ -1,5 +1,9 @@
-use std::slice;
-use std::hash::Hash;
+use alloc::boxed::Box;
+
+use collections::vec::Vec;
+
+use core::slice;
+use core::hash::Hash;
 
 use super::reader::Reader;
 

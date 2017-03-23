@@ -1,6 +1,5 @@
-use std::io::Read;
-use std::convert::From;
-use std::hash::Hash;
+use core::convert::From;
+use core::hash::Hash;
 
 use super::input::{input_update, Input};
 use super::readers::Readers;
@@ -26,27 +25,6 @@ impl<'a, T> From<&'a str> for Lexer<T>
     }
 }
 
-impl<'a, T> From<&'a String> for Lexer<T>
-    where T: Clone + Eq + PartialEq + Hash
-{
-    #[inline(always)]
-    fn from(value: &'a String) -> Self {
-        From::from(value.as_str())
-    }
-}
-
-impl<'a, R, T> From<&'a mut R> for Lexer<T>
-    where R: Read,
-          T: Clone + Eq + PartialEq + Hash
-{
-    #[inline]
-    fn from(value: &'a mut R) -> Self {
-        let mut string = String::new();
-        value.read_to_string(&mut string).expect("failed to read value");
-        From::from(string.as_str())
-    }
-}
-
 impl<T> Iterator for Lexer<T>
     where T: Clone + Eq + PartialEq + Hash
 {
@@ -59,6 +37,7 @@ impl<T> Iterator for Lexer<T>
         } else {
             let mut token = None;
             let mut new_state = None;
+            let orig_index = self.input.state().index();
 
             for reader in self.readers.iter() {
                 let mut state = self.input.state().clone();
@@ -76,6 +55,13 @@ impl<T> Iterator for Lexer<T>
             if let Some(ref state) = new_state {
                 input_update(&mut self.input, state);
             }
+
+            assert!(
+                orig_index != self.input.state().index() ||
+                self.input.done(self.input.state()),
+                "Lexer: No reader was able to read at index {:?}",
+                orig_index
+            );
 
             token
         }
