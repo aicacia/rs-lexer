@@ -25,7 +25,6 @@ impl TokenMeta {
         line_end: u64
     ) -> Self {
         assert!(index_end > index_start, "token meta error: end index cannot be less than the start row of a token.");
-        assert!(col_end >= col_start, "token meta error: end col cannot be less than the start col of a token.");
         assert!(line_end >= line_start, "token meta error: end line cannot be less than the start line of a token.");
 
         TokenMeta {
