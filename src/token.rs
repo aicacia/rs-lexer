@@ -3,6 +3,8 @@ use collections::string::String;
 use core::fmt::{self, Debug};
 use core::hash::Hash;
 
+use super::state::State;
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct TokenMeta {
@@ -24,8 +26,14 @@ impl TokenMeta {
         line_start: u64,
         line_end: u64
     ) -> Self {
-        assert!(index_end > index_start, "token meta error: end index cannot be less than the start row of a token.");
-        assert!(line_end >= line_start, "token meta error: end line cannot be less than the start line of a token.");
+        assert!(
+            index_end > index_start,
+            "token meta error: end index cannot be less than the start row of a token."
+        );
+        assert!(
+            line_end >= line_start,
+            "token meta error: end line cannot be less than the start line of a token."
+        );
 
         TokenMeta {
             index_start: index_start,
@@ -35,6 +43,18 @@ impl TokenMeta {
             line_start: line_start,
             line_end: line_end,
         }
+    }
+
+    #[inline(always)]
+    pub fn new_state_meta<'a>(current_state: &'a State, state: &'a State) -> TokenMeta {
+        TokenMeta::new(
+            current_state.index() as u64,
+            state.index() as u64,
+            current_state.col(),
+            state.col(),
+            current_state.row(),
+            state.row()
+        )
     }
 
     #[inline(always)]

@@ -13,5 +13,5 @@ pub trait Reader<T>
         1000usize
     }
 
-    fn read(&self, &Input, &mut State) -> Option<Token<T>>;
+    fn read(&self, &Input, &State, &mut State) -> Option<Token<T>>;
 }

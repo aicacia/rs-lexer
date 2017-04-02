@@ -22,19 +22,19 @@ impl Reader<TokenKind> for WhitespaceReader {
         1usize
     }
 
-    fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = input.read(state);
+    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token<TokenKind>> {
+        let ch = input.read(next);
 
         if ch.is_whitespace() {
             let mut string = String::new();
 
             string.push(ch);
 
-            while !input.done(state) {
-                let ch = input.char_at(state, 0);
+            while !input.done(next) {
+                let ch = input.peek(next, 0);
 
                 if ch.is_whitespace() {
-                    input.read(state);
+                    input.read(next);
                     string.push(ch);
                 } else {
                     break;
@@ -42,7 +42,7 @@ impl Reader<TokenKind> for WhitespaceReader {
             }
 
             Some(Token::new(
-                input.new_state_meta(state),
+                TokenMeta::new_state_meta(current, next),
                 TokenKind::WHITESPACE,
                 string
             ))
@@ -62,19 +62,19 @@ impl Reader<TokenKind> for IdentifierReader {
         0usize
     }
 
-    fn read(&self, input: &Input, state: &mut State) -> Option<Token<TokenKind>> {
-        let ch = input.read(state);
+    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token<TokenKind>> {
+        let ch = input.read(next);
 
         if ch.is_alphabetic() {
             let mut string = String::new();
 
             string.push(ch);
 
-            while !input.done(state) {
-                let ch = input.char_at(state, 0);
+            while !input.done(next) {
+                let ch = input.peek(next, 0);
 
                 if ch.is_alphanumeric() {
-                    input.read(state);
+                    input.read(next);
                     string.push(ch);
                 } else {
                     break;
@@ -82,7 +82,7 @@ impl Reader<TokenKind> for IdentifierReader {
             }
 
             Some(Token::new(
-                input.new_state_meta(state),
+                TokenMeta::new_state_meta(current, next),
                 TokenKind::IDENTIFIER,
                 string
             ))
@@ -95,7 +95,7 @@ impl Reader<TokenKind> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexer = Lexer::<TokenKind>::from("   \n\t   ");
+    let mut lexer = Lexer::<TokenKind, _>::from("   \n\t   ");
 
     lexer.readers
         .add(WhitespaceReader)
@@ -120,7 +120,7 @@ fn test_lexer_whitespace() {
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexer = Lexer::<TokenKind>::from("def name");
+    let mut lexer = Lexer::<TokenKind, _>::from("def name");
 
     lexer.readers
         .add(WhitespaceReader)
