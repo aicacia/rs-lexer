@@ -4,19 +4,24 @@ use super::state::State;
 
 
 pub trait Input {
-    fn read(&self, state: &mut State) -> char;
+    fn read(&self, state: &mut State) -> Option<char>;
     fn done(&self, state: &State) -> bool;
     fn can_read(&self, state: &State, offset: usize) -> bool;
-    fn peek(&self, state: &State, offset: usize) -> char;
+    fn peek(&self, state: &State, offset: usize) -> Option<char>;
 }
+
 
 impl Input for Vec<char> {
 
     #[inline]
-    fn read(&self, state: &mut State) -> char {
-        let ch = self.peek(state, 0);
-        state.read(ch == '\n');
-        ch
+    fn read(&self, state: &mut State) -> Option<char> {
+        match self.peek(state, 0) {
+            Some(ch) => {
+                state.read(ch == '\n');
+                Some(ch)
+            },
+            None => None,
+        }
     }
 
     #[inline(always)]
@@ -30,9 +35,15 @@ impl Input for Vec<char> {
     }
 
     #[inline(always)]
-    fn peek(&self, state: &State, offset: usize) -> char {
-        unsafe {
-            *self.get_unchecked(state.index() + offset)
+    fn peek(&self, state: &State, offset: usize) -> Option<char> {
+        let index = state.index() + offset;
+
+        if index < self.len() {
+            Some(unsafe {
+                *self.get_unchecked(state.index() + offset)
+            })
+        } else {
+            None
         }
     }
 }

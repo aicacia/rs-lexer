@@ -3,20 +3,15 @@ use alloc::boxed::Box;
 use collections::vec::Vec;
 
 use core::slice;
-use core::hash::Hash;
 
 use super::reader::Reader;
 
 
-pub struct Readers<T>
-    where T: Clone + Eq + PartialEq + Hash
-{
+pub struct Readers<T> {
     readers: Vec<Box<Reader<T>>>,
 }
 
-impl<T> Readers<T>
-    where T: Clone + Eq + PartialEq + Hash
-{
+impl<T> Readers<T> {
     #[inline(always)]
     pub fn new() -> Self {
         Readers {

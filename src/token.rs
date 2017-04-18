@@ -1,5 +1,3 @@
-use collections::string::String;
-
 use core::fmt::{self, Debug};
 use core::hash::Hash;
 
@@ -90,20 +88,20 @@ impl TokenMeta {
 
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct Token<T>
+pub struct Token<T, V>
     where T: Clone + Eq + PartialEq + Hash
 {
-    kind: T,
     meta: TokenMeta,
-    value: String,
+    kind: T,
+    value: V,
 }
 
-impl<T> Token<T>
+impl<T, V> Token<T, V>
     where T: Clone + Eq + PartialEq + Hash
 {
 
     #[inline(always)]
-    pub fn new(meta: TokenMeta, kind: T, value: String) -> Self {
+    pub fn new(meta: TokenMeta, kind: T, value: V) -> Self {
         Token {
             meta: meta,
             kind: kind,
@@ -116,7 +114,7 @@ impl<T> Token<T>
     #[inline(always)]
     pub fn kind(&self) -> &T { &self.kind }
     #[inline(always)]
-    pub fn value(&self) -> &String { &self.value }
+    pub fn value(&self) -> &V { &self.value }
 
     #[inline(always)]
     pub fn is_kind(&self, t: &T) -> bool {
@@ -124,21 +122,22 @@ impl<T> Token<T>
     }
 }
 
-impl<T> fmt::Debug for Token<T>
-    where T: Debug + Clone + Eq + PartialEq + Hash
+impl<T, V> fmt::Debug for Token<T, V>
+    where T: Debug + Clone + Eq + PartialEq + Hash,
+          V: Debug
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", {
-            let m = &self.meta;
+            let meta = self.meta();
 
-            format!("<{:?} {:?} ls=({}) lc=({}) cols=({},{})>",
+            format!("<{:?} {:?} line_start: {}, line_count: {}, row: {}, col: {}>",
                 self.kind,
                 self.value,
-                m.line_start,
-                m.line_count(),
-                m.col_start,
-                m.col_end
+                meta.line_start,
+                meta.line_count(),
+                meta.col_start,
+                meta.col_end
             )
         })
     }

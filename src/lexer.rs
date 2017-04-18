@@ -1,25 +1,19 @@
 use collections::vec::Vec;
 
 use core::convert::From;
-use core::hash::Hash;
 
 use super::input::Input;
 use super::state::State;
 use super::readers::Readers;
-use super::token::Token;
 
 
-pub struct Lexer<T, I: Input>
-    where T: Clone + Eq + PartialEq + Hash
-{
+pub struct Lexer<T, I: Input> {
     pub readers: Readers<T>,
     pub state: State,
     pub input: I,
 }
 
-impl<'a, T> From<&'a str> for Lexer<T, Vec<char>>
-    where T: Clone + Eq + PartialEq + Hash
-{
+impl<'a, T> From<&'a str> for Lexer<T, Vec<char>> {
     #[inline(always)]
     fn from(value: &'a str) -> Self {
         Lexer {
@@ -30,10 +24,8 @@ impl<'a, T> From<&'a str> for Lexer<T, Vec<char>>
     }
 }
 
-impl<T, I: Input> Iterator for Lexer<T, I>
-    where T: Clone + Eq + PartialEq + Hash
-{
-    type Item = Token<T>;
+impl<T, I: Input> Iterator for Lexer<T, I> {
+    type Item = T;
 
 
     fn next(&mut self) -> Option<Self::Item> {

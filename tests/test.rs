@@ -11,43 +11,54 @@ pub enum TokenKind {
     IDENTIFIER,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum TokenValue {
+    Chr(char),
+    Str(String),
+}
+
+pub type MyToken = Token<TokenKind, TokenValue>;
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
-impl Reader<TokenKind> for WhitespaceReader {
+impl Reader<MyToken> for WhitespaceReader {
 
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token<TokenKind>> {
-        let ch = input.read(next);
+    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+        match input.read(next) {
+            Some(ch) => if ch.is_whitespace() {
+                let mut string = String::new();
 
-        if ch.is_whitespace() {
-            let mut string = String::new();
+                string.push(ch);
 
-            string.push(ch);
-
-            while !input.done(next) {
-                let ch = input.peek(next, 0);
-
-                if ch.is_whitespace() {
-                    input.read(next);
-                    string.push(ch);
-                } else {
-                    break;
+                while !input.done(next) {
+                    if let Some(ch) = input.peek(next, 0) {
+                        if ch.is_whitespace() {
+                            input.read(next);
+                            string.push(ch);
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-            }
 
-            Some(Token::new(
-                TokenMeta::new_state_meta(current, next),
-                TokenKind::WHITESPACE,
-                string
-            ))
-        } else {
-            None
+                Some(Token::new(
+                    TokenMeta::new_state_meta(current, next),
+                    TokenKind::WHITESPACE,
+                    TokenValue::Str(string)
+                ))
+            } else {
+                None
+            },
+            None => None,
         }
     }
 }
@@ -55,39 +66,42 @@ impl Reader<TokenKind> for WhitespaceReader {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct IdentifierReader;
 
-impl Reader<TokenKind> for IdentifierReader {
+impl Reader<MyToken> for IdentifierReader {
 
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token<TokenKind>> {
-        let ch = input.read(next);
+    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+        match input.read(next) {
+            Some(ch) => if ch.is_alphabetic() {
+                let mut string = String::new();
 
-        if ch.is_alphabetic() {
-            let mut string = String::new();
+                string.push(ch);
 
-            string.push(ch);
-
-            while !input.done(next) {
-                let ch = input.peek(next, 0);
-
-                if ch.is_alphanumeric() {
-                    input.read(next);
-                    string.push(ch);
-                } else {
-                    break;
+                while !input.done(next) {
+                    if let Some(ch) = input.peek(next, 0) {
+                        if ch.is_alphanumeric() {
+                            input.read(next);
+                            string.push(ch);
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-            }
 
-            Some(Token::new(
-                TokenMeta::new_state_meta(current, next),
-                TokenKind::IDENTIFIER,
-                string
-            ))
-        } else {
-            None
+                Some(Token::new(
+                    TokenMeta::new_state_meta(current, next),
+                    TokenKind::IDENTIFIER,
+                    TokenValue::Str(string)
+                ))
+            } else {
+                None
+            },
+            None => None,
         }
     }
 }
@@ -95,14 +109,14 @@ impl Reader<TokenKind> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexer = Lexer::<TokenKind, _>::from("   \n\t   ");
+    let mut lexer = Lexer::from("   \n\t   ");
 
     lexer.readers
         .add(WhitespaceReader)
         .add(IdentifierReader)
         .sort();
 
-    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+    let tokens: Vec<MyToken> = lexer.collect();
 
     assert_eq!(tokens.len(), 1);
 
@@ -115,19 +129,21 @@ fn test_lexer_whitespace() {
     assert_eq!(ws_token.meta().line_end(), 2);
     assert_eq!(ws_token.meta().line_count(), 2);
     assert_eq!(ws_token.meta().len(), 8);
-    assert_eq!(ws_token.value().len(), 8);
+    if let &TokenValue::Str(ref string) = ws_token.value() {
+        assert_eq!(string.len(), 8);
+    }
 }
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexer = Lexer::<TokenKind, _>::from("def name");
+    let mut lexer = Lexer::from("def name");
 
     lexer.readers
         .add(WhitespaceReader)
         .add(IdentifierReader)
         .sort();
 
-    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+    let tokens: Vec<MyToken> = lexer.collect();
 
     assert_eq!(tokens.len(), 3);
 
@@ -139,7 +155,9 @@ fn test_lexer_identifier() {
     assert_eq!(ident_token.meta().line_start(), 1);
     assert_eq!(ident_token.meta().line_end(), 1);
     assert_eq!(ident_token.meta().line_count(), 1);
-    assert_eq!(ident_token.value(), "def");
     assert_eq!(ident_token.meta().len(), 3);
-    assert_eq!(ident_token.value().len(), 3);
+    if let &TokenValue::Str(ref string) = ident_token.value() {
+        assert_eq!(string, "def");
+        assert_eq!(string.len(), 3);
+    }
 }

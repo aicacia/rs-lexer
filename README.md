@@ -8,7 +8,7 @@ plugin based lexical reader
 extern crate lexer;
 
 
-use lexer::*;
+use lexer::{Lexer, Input, State, TokenMeta, Reader};
 
 
 #[allow(non_camel_case_types)]
@@ -18,18 +18,22 @@ pub enum TokenKind {
     IDENTIFIER,
 }
 
+pub type TokenValue = String;
+
+pub type Token = lexer::Token<TokenKind, TokenValue>;
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
-impl Reader<TokenKind> for WhitespaceReader {
+impl Reader<Token> for WhitespaceReader {
 
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token<TokenKind>> {
+    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token> {
         let ch = input.read(next);
 
         if ch.is_whitespace() {
@@ -38,13 +42,13 @@ impl Reader<TokenKind> for WhitespaceReader {
             string.push(ch);
 
             while !input.done(next) {
-                let ch = input.peek(next, 0);
-
-                if ch.is_whitespace() {
-                    input.read(next);
-                    string.push(ch);
-                } else {
-                    break;
+                if let Some(ch) = input.peek(next, 0) {
+                  if ch.is_whitespace() {
+                      input.read(next);
+                      string.push(ch);
+                  } else {
+                      break;
+                  }
                 }
             }
 
@@ -60,13 +64,13 @@ impl Reader<TokenKind> for WhitespaceReader {
 }
 
 fn main() {
-    let mut lexer = Lexer::<TokenKind, Vec<char>>::from("   \n\t   ");
+    let mut lexer = Lexer::from("   \n\t   ");
 
     lexer.readers
         .add(WhitespaceReader)
         .sort();
 
-    let tokens: Vec<Token<TokenKind>> = lexer.collect();
+    let tokens: Vec<Token> = lexer.collect();
     println!("{:?}", tokens);
 }
 ```
