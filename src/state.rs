@@ -7,6 +7,9 @@ pub struct State {
     col: u64,
 }
 
+unsafe impl Send for State {}
+unsafe impl Sync for State {}
+
 impl State {
 
     #[inline(always)]

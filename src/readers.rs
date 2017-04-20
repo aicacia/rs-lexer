@@ -12,6 +12,7 @@ pub struct Readers<T> {
 }
 
 impl<T> Readers<T> {
+
     #[inline(always)]
     pub fn new() -> Self {
         Readers {
@@ -25,18 +26,19 @@ impl<T> Readers<T> {
         self
     }
 
+    #[inline(always)]
+    pub fn len(&mut self) -> usize {
+        self.readers.len()
+    }
+
     #[inline]
     pub fn sort(&mut self) -> &mut Self {
         self.readers.sort_by(|a, b| a.priority().cmp(&b.priority()));
         self
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn iter(&mut self) -> slice::Iter<Box<Reader<T>>> {
         self.readers.iter()
-    }
-    #[inline]
-    pub fn iter_mut(&mut self) -> slice::IterMut<Box<Reader<T>>> {
-        self.readers.iter_mut()
     }
 }

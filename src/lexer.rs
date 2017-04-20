@@ -13,14 +13,22 @@ pub struct Lexer<T, I: Input> {
     pub input: I,
 }
 
-impl<'a, T> From<&'a str> for Lexer<T, Vec<char>> {
+impl<T, I: Input> Lexer<T, I> {
+
     #[inline(always)]
-    fn from(value: &'a str) -> Self {
+    fn new(input: I) -> Self {
         Lexer {
             readers: Readers::new(),
             state: State::new(),
-            input: value.chars().collect(),
+            input: input,
         }
+    }
+}
+
+impl<'a, T> From<&'a str> for Lexer<T, Vec<char>> {
+    #[inline(always)]
+    fn from(value: &'a str) -> Self {
+        Self::new(value.chars().collect())
     }
 }
 

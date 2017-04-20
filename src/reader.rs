@@ -2,7 +2,7 @@ use super::input::Input;
 use super::state::State;
 
 
-pub trait Reader<T> {
+pub trait Reader<T>: Sync + Send {
 
     #[inline(always)]
     fn priority(&self) -> usize {

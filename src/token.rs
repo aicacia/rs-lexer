@@ -14,6 +14,9 @@ pub struct TokenMeta {
     line_end: u64,
 }
 
+unsafe impl Send for TokenMeta {}
+unsafe impl Sync for TokenMeta {}
+
 impl TokenMeta {
     #[inline]
     pub fn new(
@@ -95,6 +98,9 @@ pub struct Token<T, V>
     kind: T,
     value: V,
 }
+
+unsafe impl<T: Send + Clone + Eq + PartialEq + Hash, V: Send> Send for Token<T, V> {}
+unsafe impl<T: Sync + Clone + Eq + PartialEq + Hash, V: Sync> Sync for Token<T, V> {}
 
 impl<T, V> Token<T, V>
     where T: Clone + Eq + PartialEq + Hash

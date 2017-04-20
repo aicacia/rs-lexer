@@ -3,7 +3,7 @@ use collections::vec::Vec;
 use super::state::State;
 
 
-pub trait Input {
+pub trait Input: Sync + Send {
     fn read(&self, state: &mut State) -> Option<char>;
     fn done(&self, state: &State) -> bool;
     fn can_read(&self, state: &State, offset: usize) -> bool;
