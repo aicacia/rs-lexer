@@ -16,7 +16,7 @@ pub struct Lexer<T, I: Input> {
 impl<T, I: Input> Lexer<T, I> {
 
     #[inline(always)]
-    fn new(input: I) -> Self {
+    pub fn new(input: I) -> Self {
         Lexer {
             readers: Readers::new(),
             state: State::new(),
@@ -35,7 +35,7 @@ impl<'a, T> From<&'a str> for Lexer<T, Vec<char>> {
 impl<T, I: Input> Iterator for Lexer<T, I> {
     type Item = T;
 
-
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if self.input.done(&self.state) {
             None
@@ -58,7 +58,7 @@ impl<T, I: Input> Iterator for Lexer<T, I> {
             }
 
             if let Some(ref state) = new_state {
-                self.state.update(state);
+                self.state.clone_from(state);
             }
 
             assert!(

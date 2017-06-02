@@ -121,14 +121,6 @@ fn bench_lexer(b: &mut Bencher) {
 
         lexer.readers
             .add(WhitespaceReader)
-            .add(WhitespaceReader)
-            .add(WhitespaceReader)
-            .add(WhitespaceReader)
-            .add(IdentifierReader)
-            .add(IdentifierReader)
-            .add(IdentifierReader)
-            .add(IdentifierReader)
-            .add(IdentifierReader)
             .add(IdentifierReader)
             .sort();
 

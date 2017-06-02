@@ -39,11 +39,4 @@ impl State {
 
         self.index += 1;
     }
-
-    #[inline]
-    pub(crate) fn update(&mut self, other: &State) {
-        self.index = other.index;
-        self.row = other.row;
-        self.col = other.col;
-    }
 }

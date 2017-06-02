@@ -23,7 +23,7 @@ pub type TokenValue = String;
 pub type Token = lexer::Token<TokenKind, TokenValue>;
 
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct WhitespaceReader;
 
 impl Reader<Token> for WhitespaceReader {
@@ -33,6 +33,7 @@ impl Reader<Token> for WhitespaceReader {
         1usize
     }
 
+    #[inline]
     fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<Token> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {

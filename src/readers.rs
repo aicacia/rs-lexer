@@ -20,7 +20,7 @@ impl<T> Readers<T> {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
         self.readers.push(Box::new(reader));
         self
@@ -31,7 +31,7 @@ impl<T> Readers<T> {
         self.readers.len()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn sort(&mut self) -> &mut Self {
         self.readers.sort_by(|a, b| a.priority().cmp(&b.priority()));
         self
