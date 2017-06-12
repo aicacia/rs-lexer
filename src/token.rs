@@ -1,4 +1,4 @@
-use core::fmt::{self, Debug};
+use core::fmt::{self, Debug, Display};
 use core::hash::Hash;
 
 use super::state::State;
@@ -138,6 +138,27 @@ impl<T, V> fmt::Debug for Token<T, V>
             let meta = self.meta();
 
             format!("<{:?} {:?} line_start: {}, line_count: {}, row: {}, col: {}>",
+                self.kind,
+                self.value,
+                meta.line_start,
+                meta.line_count(),
+                meta.col_start,
+                meta.col_end
+            )
+        })
+    }
+}
+
+impl<T, V> fmt::Display for Token<T, V>
+    where T: Display + Clone + Eq + PartialEq + Hash,
+          V: Display
+{
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", {
+            let meta = self.meta();
+
+            format!("<{} {} line_start: {}, line_count: {}, row: {}, col: {}>",
                 self.kind,
                 self.value,
                 meta.line_start,

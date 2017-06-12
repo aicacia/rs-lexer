@@ -11,4 +11,6 @@ repository = "https://github.com/nathanfaucett/rs-lexer.git"
 homepage = "https://github.com/nathanfaucett/rs-lexer"
 
 [dependencies]
+collection_traits = {git = "https://github.com/nathanfaucett/rs-collection_traits.git"}
+
 [dev-dependencies]

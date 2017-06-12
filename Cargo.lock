@@ -1,4 +1,14 @@
 [root]
 name = "lexer"
 version = "0.1.0"
+dependencies = [
+ "collection_traits 0.1.0 (git+https://github.com/nathanfaucett/rs-collection_traits.git)",
+]
 
+[[package]]
+name = "collection_traits"
+version = "0.1.0"
+source = "git+https://github.com/nathanfaucett/rs-collection_traits.git#0fe9149febf33e7049ae679adbe55e12d9c56b01"
+
+[metadata]
+"checksum collection_traits 0.1.0 (git+https://github.com/nathanfaucett/rs-collection_traits.git)" = "<none>"

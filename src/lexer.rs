@@ -1,6 +1,9 @@
 use collections::vec::Vec;
 
 use core::convert::From;
+use core::ops::Index;
+
+use collection_traits::*;
 
 use super::input::Input;
 use super::state::State;
@@ -22,6 +25,25 @@ impl<T, I: Input> Lexer<T, I> {
             state: State::new(),
             input: input,
         }
+    }
+}
+
+impl<T, I> From<I> for Lexer<T, I>
+    where I: Collection +
+             Index<usize, Output = char> +
+{
+    #[inline(always)]
+    fn from(value: I) -> Self {
+        Self::new(value)
+    }
+}
+
+impl<'a, T, I> From<&'a I> for Lexer<T, Vec<char>>
+    where I: Iterable<'a, char>
+{
+    #[inline(always)]
+    fn from(value: &'a I) -> Self {
+        Self::new(value.iter().collect())
     }
 }
 

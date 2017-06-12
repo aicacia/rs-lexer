@@ -6,6 +6,7 @@
 extern crate alloc;
 #[macro_use]
 extern crate collections;
+extern crate collection_traits;
 
 
 mod input;

@@ -1,5 +1,8 @@
+extern crate collection_traits;
 extern crate lexer;
 
+
+use collection_traits::*;
 
 use lexer::*;
 
@@ -109,7 +112,8 @@ impl Reader<MyToken> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let mut lexer = Lexer::from("   \n\t   ");
+    let vec: Vec<char> = String::from("   \n\t   ").iter().collect();
+    let mut lexer = Lexer::from(vec);
 
     lexer.readers
         .add(WhitespaceReader)
