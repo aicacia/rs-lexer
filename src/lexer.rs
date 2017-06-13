@@ -39,11 +39,11 @@ impl<T, I> From<I> for Lexer<T, I>
 }
 
 impl<'a, T, I> From<&'a I> for Lexer<T, Vec<char>>
-    where I: Iterable<'a, char>
+    where I: Iterable<'a, &'a char>
 {
     #[inline(always)]
     fn from(value: &'a I) -> Self {
-        Self::new(value.iter().collect())
+        Self::new(value.iter().map(|ch| *ch).collect())
     }
 }
 
