@@ -1,4 +1,4 @@
-use collections::vec::Vec;
+use alloc::vec::Vec;
 
 use core::convert::From;
 use core::ops::Index;
