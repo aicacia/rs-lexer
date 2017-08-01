@@ -7,10 +7,10 @@ keywords = ["plugins", "plugin", "lexical", "reader"]
 description = "plugin based lexical reader"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/nathanfaucett/rs-lexer.git"
-homepage = "https://github.com/nathanfaucett/rs-lexer"
+repository = "https://gitlab.com/nathanfaucett/rs-lexer.git"
+homepage = "https://gitlab.com/nathanfaucett/rs-lexer"
 
 [dependencies]
-collection_traits = {git = "https://github.com/nathanfaucett/rs-collection_traits.git"}
+collection_traits = {git = "https://gitlab.com/nathanfaucett/rs-collection_traits.git"}
 
 [dev-dependencies]
