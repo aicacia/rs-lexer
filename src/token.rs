@@ -18,6 +18,7 @@ unsafe impl Send for TokenMeta {}
 unsafe impl Sync for TokenMeta {}
 
 impl TokenMeta {
+
     #[inline]
     pub fn new(
         index_start: u64,

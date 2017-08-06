@@ -15,9 +15,9 @@ mod state;
 mod token;
 
 
-pub use input::Input;
-pub use lexer::Lexer;
-pub use reader::Reader;
-pub use readers::Readers;
-pub use state::State;
-pub use token::{Token, TokenMeta};
+pub use self::input::Input;
+pub use self::lexer::Lexer;
+pub use self::reader::Reader;
+pub use self::readers::Readers;
+pub use self::state::State;
+pub use self::token::{Token, TokenMeta};
