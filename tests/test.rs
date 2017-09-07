@@ -1,8 +1,8 @@
-extern crate collection_traits;
+extern crate data_structure_traits;
 extern crate lexer;
 
 
-use collection_traits::*;
+use data_structure_traits::*;
 
 use lexer::*;
 

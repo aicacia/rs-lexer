@@ -1,6 +1,6 @@
 use core::ops::Index;
 
-use collection_traits::*;
+use data_structure_traits::*;
 
 use super::state::State;
 

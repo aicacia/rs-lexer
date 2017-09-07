@@ -4,7 +4,7 @@
 
 #[macro_use]
 extern crate alloc;
-extern crate collection_traits;
+extern crate data_structure_traits;
 
 
 mod input;

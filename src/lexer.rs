@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use core::convert::From;
 use core::ops::Index;
 
-use collection_traits::*;
+use data_structure_traits::*;
 
 use super::input::Input;
 use super::state::State;
