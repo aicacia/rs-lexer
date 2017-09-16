@@ -2,13 +2,13 @@
 name = "lexer"
 version = "0.1.0"
 dependencies = [
- "data_structure_traits 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "data_structure_traits 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "data_structure_traits"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
-"checksum data_structure_traits 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "30ac5bd5c27245c28a5bb1b6dbd89d32ddf10b3c7b84da222856bb3ff42d8dfd"
+"checksum data_structure_traits 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7bdda207c42eaa0266560d45c8274bade04be19a55dadd71c9e906015c6ea956"
