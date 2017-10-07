@@ -2,8 +2,7 @@
 #![no_std]
 
 
-#[macro_use]
-extern crate alloc;
+#[macro_use] extern crate alloc;
 extern crate data_structure_traits;
 
 

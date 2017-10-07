@@ -11,11 +11,10 @@ use test::Bencher;
 use lexer::*;
 
 
-#[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenKind {
-    WHITESPACE,
-    IDENTIFIER,
+    Whitespace,
+    Identifier,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -59,7 +58,7 @@ impl Reader<MyToken> for WhitespaceReader {
 
                 Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::WHITESPACE,
+                    TokenKind::Whitespace,
                     TokenValue::Str(string)
                 ))
             } else {
@@ -102,7 +101,7 @@ impl Reader<MyToken> for IdentifierReader {
 
                 Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::IDENTIFIER,
+                    TokenKind::Identifier,
                     TokenValue::Str(string)
                 ))
             } else {

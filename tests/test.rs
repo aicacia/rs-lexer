@@ -7,11 +7,10 @@ use data_structure_traits::*;
 use lexer::*;
 
 
-#[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenKind {
-    WHITESPACE,
-    IDENTIFIER,
+    Whitespace,
+    Identifier,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -55,7 +54,7 @@ impl Reader<MyToken> for WhitespaceReader {
 
                 Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::WHITESPACE,
+                    TokenKind::Whitespace,
                     TokenValue::Str(string)
                 ))
             } else {
@@ -98,7 +97,7 @@ impl Reader<MyToken> for IdentifierReader {
 
                 Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::IDENTIFIER,
+                    TokenKind::Identifier,
                     TokenValue::Str(string)
                 ))
             } else {
@@ -125,7 +124,7 @@ fn test_lexer_whitespace() {
     assert_eq!(tokens.len(), 1);
 
     let ws_token = &tokens[0];
-    assert_eq!(ws_token.kind(), &TokenKind::WHITESPACE);
+    assert_eq!(ws_token.kind(), &TokenKind::Whitespace);
     assert_eq!(ws_token.meta().col_start(), 1);
     assert_eq!(ws_token.meta().col_end(), 5);
     assert_eq!(ws_token.meta().col_count(), 5);
@@ -152,7 +151,7 @@ fn test_lexer_identifier() {
     assert_eq!(tokens.len(), 3);
 
     let ident_token = &tokens[0];
-    assert_eq!(ident_token.kind(), &TokenKind::IDENTIFIER);
+    assert_eq!(ident_token.kind(), &TokenKind::Identifier);
     assert_eq!(ident_token.meta().col_start(), 1);
     assert_eq!(ident_token.meta().col_end(), 3);
     assert_eq!(ident_token.meta().col_count(), 3);

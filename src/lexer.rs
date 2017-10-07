@@ -64,10 +64,10 @@ impl<T, I: Input> Iterator for Lexer<T, I> {
         } else {
             let mut token = None;
             let mut new_state = None;
-            let orig_index = self.state.index();
+            let orig_state = self.state.clone();
 
             for reader in self.readers.iter() {
-                let mut state = self.state.clone();
+                let mut state = orig_state.clone();
 
                 match reader.read(&self.input, &self.state, &mut state) {
                     Some(t) => {
@@ -84,10 +84,9 @@ impl<T, I: Input> Iterator for Lexer<T, I> {
             }
 
             assert!(
-                orig_index != self.state.index() ||
-                self.input.done(&self.state),
-                "Lexer: No reader was able to read at index {:?}",
-                orig_index
+                orig_state.index() != self.state.index() || self.input.done(&self.state),
+                "Lexer: No reader was able to read at {:?}",
+                orig_state
             );
 
             token

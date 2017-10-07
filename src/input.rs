@@ -6,16 +6,9 @@ use super::state::State;
 
 
 pub trait Input {
-    fn read(&self, state: &mut State) -> Option<char>;
-    fn done(&self, state: &State) -> bool;
-    fn can_read(&self, state: &State, offset: usize) -> bool;
-    fn peek(&self, state: &State, offset: usize) -> Option<char>;
-}
 
-impl<T> Input for T
-    where T: Collection +
-             Index<usize, Output = char> +
-{
+    fn peek(&self, state: &State, offset: usize) -> Option<char>;
+
     #[inline]
     fn read(&self, state: &mut State) -> Option<char> {
         match self.peek(state, 0) {
@@ -29,14 +22,19 @@ impl<T> Input for T
 
     #[inline(always)]
     fn done(&self, state: &State) -> bool {
-        state.index() >= self.len()
+        self.peek(state, 0).is_none()
     }
 
     #[inline(always)]
     fn can_read(&self, state: &State, offset: usize) -> bool {
-        (state.index() + offset) < self.len()
+        self.peek(state, offset).is_some()
     }
+}
 
+impl<T> Input for T
+    where T: Collection +
+             Index<usize, Output=char>
+{
     #[inline(always)]
     fn peek(&self, state: &State, offset: usize) -> Option<char> {
         let index = state.index() + offset;
