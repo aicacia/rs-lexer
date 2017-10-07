@@ -1,14 +1,4 @@
 [root]
 name = "lexer"
 version = "0.1.0"
-dependencies = [
- "data_structure_traits 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
-[[package]]
-name = "data_structure_traits"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[metadata]
-"checksum data_structure_traits 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "9129b4fa51a7d50b34e7d4aa356ecf142ee7262a701732270b90db22de64f26e"

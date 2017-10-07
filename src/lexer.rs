@@ -1,9 +1,6 @@
 use alloc::vec::Vec;
 
 use core::convert::From;
-use core::ops::Index;
-
-use data_structure_traits::*;
 
 use super::input::Input;
 use super::state::State;
@@ -18,7 +15,7 @@ pub struct Lexer<T, I: Input> {
 
 impl<T, I: Input> Lexer<T, I> {
 
-    #[inline(always)]
+    #[inline]
     pub fn new(input: I) -> Self {
         Lexer {
             readers: Readers::new(),
@@ -29,8 +26,7 @@ impl<T, I: Input> Lexer<T, I> {
 }
 
 impl<T, I> From<I> for Lexer<T, I>
-    where I: Collection +
-             Index<usize, Output = char> +
+    where I: Input
 {
     #[inline(always)]
     fn from(value: I) -> Self {
@@ -38,17 +34,8 @@ impl<T, I> From<I> for Lexer<T, I>
     }
 }
 
-impl<'a, T, I> From<&'a I> for Lexer<T, Vec<char>>
-    where I: Iterable<'a, &'a char>
-{
-    #[inline(always)]
-    fn from(value: &'a I) -> Self {
-        Self::new(value.iter().map(|ch| *ch).collect())
-    }
-}
-
 impl<'a, T> From<&'a str> for Lexer<T, Vec<char>> {
-    #[inline(always)]
+    #[inline]
     fn from(value: &'a str) -> Self {
         Self::new(value.chars().collect())
     }

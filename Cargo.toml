@@ -11,6 +11,4 @@ repository = "https://gitlab.com/nathanfaucett/rs-lexer.git"
 homepage = "https://gitlab.com/nathanfaucett/rs-lexer"
 
 [dependencies]
-data_structure_traits = { version = "0.1", default-features = false }
-
 [dev-dependencies]

@@ -3,7 +3,6 @@
 
 
 #[macro_use] extern crate alloc;
-extern crate data_structure_traits;
 
 
 mod input;

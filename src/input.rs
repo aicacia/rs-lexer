@@ -1,6 +1,4 @@
-use core::ops::Index;
-
-use data_structure_traits::*;
+use alloc::vec::Vec;
 
 use super::state::State;
 
@@ -31,10 +29,7 @@ pub trait Input {
     }
 }
 
-impl<T> Input for T
-    where T: Collection +
-             Index<usize, Output=char>
-{
+impl Input for Vec<char> {
     #[inline(always)]
     fn peek(&self, state: &State, offset: usize) -> Option<char> {
         let index = state.index() + offset;
