@@ -29,6 +29,18 @@ impl<T> Readers<T> {
         }
     }
 
+    #[inline]
+    pub fn add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
+        self.vec.push(Box::new(reader));
+        self.sort()
+    }
+
+    #[inline]
+    fn sort(&mut self) -> &mut Self {
+        self.vec.sort_by(|a, b| a.priority().cmp(&b.priority()));
+        self
+    }
+
     #[inline(always)]
     pub fn lexer<I>(&self, input: I) -> Lexer<T, I>
         where I: Input,
