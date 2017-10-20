@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 
-use super::state::State;
+use super::State;
 
 
 pub trait Input {
@@ -29,8 +29,8 @@ pub trait Input {
     }
 }
 
-impl Input for Vec<char> {
-    #[inline(always)]
+impl<'a> Input for &'a [char] {
+    #[inline]
     fn peek(&self, state: &State, offset: usize) -> Option<char> {
         let index = state.index() + offset;
 
@@ -39,5 +39,19 @@ impl Input for Vec<char> {
         } else {
             None
         }
+    }
+}
+
+impl<'a> Input for &'a Vec<char> {
+    #[inline(always)]
+    fn peek(&self, state: &State, offset: usize) -> Option<char> {
+        (&***self).peek(state, offset)
+    }
+}
+
+impl Input for Vec<char> {
+    #[inline(always)]
+    fn peek(&self, state: &State, offset: usize) -> Option<char> {
+        (&**self).peek(state, offset)
     }
 }

@@ -1,7 +1,7 @@
 use core::fmt::{self, Debug, Display};
 use core::hash::Hash;
 
-use super::state::State;
+use super::State;
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

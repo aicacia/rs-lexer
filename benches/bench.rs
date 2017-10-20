@@ -115,14 +115,29 @@ impl Reader<MyToken> for IdentifierReader {
 
 #[bench]
 fn bench_lexer(b: &mut Bencher) {
-    b.iter(|| {
-        let mut lexer = Lexer::from(" def  \n\t   name ");
+    let readers = ReadersBuilder::new()
+        .add(WhitespaceReader)
+        .add(IdentifierReader)
+        .build();
 
-        lexer.readers
+    let vec = " def  \n\t   name ".chars().collect::<Vec<char>>();
+
+    b.iter(|| {
+        let lexer = readers.lexer(&vec);
+        let _: Vec<MyToken> = lexer.collect();
+    });
+}
+
+#[bench]
+fn bench_lexer_full(b: &mut Bencher) {
+    b.iter(|| {
+        let readers = ReadersBuilder::new()
             .add(WhitespaceReader)
             .add(IdentifierReader)
-            .sort();
+            .build();
 
+        let vec = " def  \n\t   name ".chars().collect::<Vec<char>>();
+        let lexer = readers.lexer(&vec);
         let _: Vec<MyToken> = lexer.collect();
     });
 }

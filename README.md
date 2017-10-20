@@ -1,4 +1,4 @@
-lexer [![Build Status](https://travis-ci.org/nathanfaucett/rs-lexer.svg?branch=master)](https://travis-ci.org/nathanfaucett/rs-lexer)
+lexer
 =====
 
 plugin based lexical reader
@@ -8,7 +8,7 @@ plugin based lexical reader
 extern crate lexer;
 
 
-use lexer::{Token, Input, Reader, State, TokenMeta, Lexer};
+use lexer::{Token, Input, Reader, State, TokenMeta};
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -114,14 +114,15 @@ impl Reader<MyToken> for IdentifierReader {
 
 
 fn main() {
-    let mut lexer = Lexer::from("Hello world\n");
-
-    lexer.readers
+    let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
         .add(IdentifierReader)
-        .sort();
+        .build();
 
+    let vec: Vec<char> = "Hello world\n".chars().collect();
+    let lexer = readers.lexer(vec);
     let tokens: Vec<MyToken> = lexer.collect();
+
     println!("{:#?}", tokens);
 }
 ```

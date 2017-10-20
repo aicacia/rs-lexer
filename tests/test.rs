@@ -108,14 +108,13 @@ impl Reader<MyToken> for IdentifierReader {
 
 #[test]
 fn test_lexer_whitespace() {
-    let vec: Vec<char> = String::from("   \n\t   ").chars().collect();
-    let mut lexer = Lexer::from(vec);
-
-    lexer.readers
+    let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
         .add(IdentifierReader)
-        .sort();
+        .build();
 
+    let vec: Vec<char> = String::from("   \n\t   ").chars().collect();
+    let lexer = readers.lexer(&vec);
     let tokens: Vec<MyToken> = lexer.collect();
 
     assert_eq!(tokens.len(), 1);
@@ -136,13 +135,13 @@ fn test_lexer_whitespace() {
 
 #[test]
 fn test_lexer_identifier() {
-    let mut lexer = Lexer::from("def name");
-
-    lexer.readers
+    let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
         .add(IdentifierReader)
-        .sort();
+        .build();
 
+    let vec = "def name".chars().collect::<Vec<char>>();
+    let lexer = readers.lexer(&vec);
     let tokens: Vec<MyToken> = lexer.collect();
 
     assert_eq!(tokens.len(), 3);

@@ -1,5 +1,4 @@
-use super::input::Input;
-use super::state::State;
+use super::{Input, State};
 
 
 pub trait Reader<T>: Sync + Send {
