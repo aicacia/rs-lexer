@@ -8,16 +8,16 @@ plugin based lexical reader
 extern crate lexer;
 
 
-use lexer::{Token, Input, Reader, State, TokenMeta};
+use lexer::{Token, Input, Reader, ReadersBuilder, State, TokenMeta};
 
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug)]
 pub enum TokenKind {
     Whitespace,
     Identifier,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug)]
 pub enum TokenValue {
     Chr(char),
     Str(String),
@@ -26,7 +26,6 @@ pub enum TokenValue {
 pub type MyToken = Token<TokenKind, TokenValue>;
 
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
 impl Reader<MyToken> for WhitespaceReader {
@@ -36,7 +35,7 @@ impl Reader<MyToken> for WhitespaceReader {
         0usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -69,7 +68,6 @@ impl Reader<MyToken> for WhitespaceReader {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct IdentifierReader;
 
 impl Reader<MyToken> for IdentifierReader {
@@ -79,7 +77,7 @@ impl Reader<MyToken> for IdentifierReader {
         1usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();

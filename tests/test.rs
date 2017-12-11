@@ -29,7 +29,7 @@ impl Reader<MyToken> for WhitespaceReader {
         1usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -72,7 +72,7 @@ impl Reader<MyToken> for IdentifierReader {
         0usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -113,8 +113,8 @@ fn test_lexer_whitespace() {
         .add(IdentifierReader)
         .build();
 
-    let vec: Vec<char> = String::from("   \n\t   ").chars().collect();
-    let lexer = readers.lexer(&vec);
+    let chars = "   \n\t   ".chars().collect::<Vec<char>>();
+    let lexer = readers.lexer(chars);
     let tokens: Vec<MyToken> = lexer.collect();
 
     assert_eq!(tokens.len(), 1);
@@ -140,11 +140,11 @@ fn test_lexer_identifier() {
         .add(IdentifierReader)
         .build();
 
-    let vec = "def name".chars().collect::<Vec<char>>();
-    let lexer = readers.lexer(&vec);
+    let chars = Chars::from(::std::fs::File::open("tests/file.txt").unwrap());
+    let lexer = readers.lexer(chars);
     let tokens: Vec<MyToken> = lexer.collect();
 
-    assert_eq!(tokens.len(), 3);
+    assert_eq!(tokens.len(), 4);
 
     let ident_token = &tokens[0];
     assert_eq!(ident_token.kind(), &TokenKind::Identifier);
@@ -159,4 +159,7 @@ fn test_lexer_identifier() {
         assert_eq!(string, "def");
         assert_eq!(string.len(), 3);
     }
+    assert_eq!(tokens[1].kind(), &TokenKind::Whitespace);
+    assert_eq!(tokens[2].kind(), &TokenKind::Identifier);
+    assert_eq!(tokens[3].kind(), &TokenKind::Whitespace);
 }

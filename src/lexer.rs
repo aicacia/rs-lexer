@@ -10,17 +10,27 @@ pub struct Lexer<'a, T, I>
     input: I,
 }
 
-impl<'a, T, I> Lexer<'a, T, I>
+impl<'a, T, I> From<(&'a Readers<T>, I)> for Lexer<'a, T, I>
     where T: 'a,
           I: 'a + Input,
 {
-    #[inline]
-    pub fn new(readers: &'a Readers<T>, input: I) -> Self {
+    #[inline(always)]
+    fn from((readers, input): (&'a Readers<T>, I)) -> Self {
         Lexer {
             readers: readers,
             state: State::new(),
             input: input,
         }
+    }
+}
+
+impl<'a, T, I> Lexer<'a, T, I>
+    where T: 'a,
+          I: 'a + Input,
+{
+    #[inline(always)]
+    pub fn new(readers: &'a Readers<T>, input: I) -> Self {
+        From::from((readers, input))
     }
 }
 
@@ -42,7 +52,7 @@ impl<'a, T, I> Iterator for Lexer<'a, T, I>
             for reader in self.readers {
                 let mut state = orig_state.clone();
 
-                match reader.read(&self.input, &self.state, &mut state) {
+                match reader.read(&mut self.input, &self.state, &mut state) {
                     Some(t) => {
                         token = Some(t);
                         new_state = Some(state);

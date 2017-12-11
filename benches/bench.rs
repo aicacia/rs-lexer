@@ -36,7 +36,7 @@ impl Reader<MyToken> for WhitespaceReader {
         1usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -79,7 +79,7 @@ impl Reader<MyToken> for IdentifierReader {
         0usize
     }
 
-    fn read(&self, input: &Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();

@@ -8,5 +8,5 @@ pub trait Reader<T>: Sync + Send {
         0usize
     }
 
-    fn read(&self, &Input, &State, &mut State) -> Option<T>;
+    fn read(&self, &mut Input, &State, &mut State) -> Option<T>;
 }

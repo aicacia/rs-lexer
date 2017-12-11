@@ -1,6 +1,6 @@
 [package]
 name = "lexer"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
 keywords = ["plugins", "plugin", "lexical", "reader"]
@@ -11,4 +11,11 @@ repository = "https://gitlab.com/nathanfaucett/rs-lexer.git"
 homepage = "https://gitlab.com/nathanfaucett/rs-lexer"
 
 [dependencies]
+serde = { version = "1.0", default-features = false }
+serde_derive = { version = "1.0" }
+
 [dev-dependencies]
+
+[features]
+use_std = []
+default = ["use_std"]

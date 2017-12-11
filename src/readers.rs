@@ -31,8 +31,13 @@ impl<T> Readers<T> {
 
     #[inline]
     pub fn add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
+        self.no_sort_add(reader).sort()
+    }
+
+    #[inline]
+    pub fn no_sort_add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
         self.vec.push(Box::new(reader));
-        self.sort()
+        self
     }
 
     #[inline]
