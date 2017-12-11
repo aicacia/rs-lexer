@@ -3,7 +3,8 @@ name = "lexer"
 version = "0.1.2"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
-keywords = ["plugins", "plugin", "lexical", "reader"]
+categories = ["parsing", "text-processing"]
+keywords = ["plugin", "lexical", "reader"]
 description = "plugin based lexical reader"
 license = "MIT"
 readme = "README.md"
