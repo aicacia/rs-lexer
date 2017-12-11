@@ -1,4 +1,4 @@
-use super::{Input, State, Readers};
+use super::{Input, State, Readers, ReaderOption};
 
 
 pub struct Lexer<'a, T, I>
@@ -47,18 +47,24 @@ impl<'a, T, I> Iterator for Lexer<'a, T, I>
         } else {
             let mut token = None;
             let mut new_state = None;
+            let mut is_empty = false;
             let orig_state = self.state.clone();
 
             for reader in self.readers {
                 let mut state = orig_state.clone();
 
                 match reader.read(&mut self.input, &self.state, &mut state) {
-                    Some(t) => {
+                    ReaderOption::Some(t) => {
                         token = Some(t);
                         new_state = Some(state);
                         break;
                     },
-                    None => (),
+                    ReaderOption::Empty => {
+                        new_state = Some(state);
+                        is_empty = true;
+                        break;
+                    },
+                    ReaderOption::None => (),
                 }
             }
 
@@ -66,13 +72,16 @@ impl<'a, T, I> Iterator for Lexer<'a, T, I>
                 self.state.clone_from(state);
             }
 
-            assert!(
-                orig_state.index() != self.state.index() || self.input.done(&self.state),
-                "Lexer: No reader was able to read at {:?}",
-                orig_state
-            );
-
-            token
+            if is_empty {
+                self.next()
+            } else {
+                assert!(
+                    orig_state.index() != self.state.index() || self.input.done(&self.state),
+                    "Lexer: No reader was able to read at {:?}",
+                    orig_state
+                );
+                token
+            }
         }
     }
 }

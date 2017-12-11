@@ -26,10 +26,10 @@ impl Reader<MyToken> for WhitespaceReader {
 
     #[inline(always)]
     fn priority(&self) -> usize {
-        1usize
+        0usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderOption<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -49,30 +49,31 @@ impl Reader<MyToken> for WhitespaceReader {
                     }
                 }
 
-                Some(Token::new(
+                ReaderOption::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Whitespace,
                     TokenValue::Str(string)
                 ))
             } else {
-                None
+                ReaderOption::None
             },
-            None => None,
+            None => ReaderOption::None,
         }
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct IdentifierReader;
 
-impl Reader<MyToken> for IdentifierReader {
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct EmptyReader;
+
+impl Reader<MyToken> for EmptyReader {
 
     #[inline(always)]
     fn priority(&self) -> usize {
-        0usize
+        1usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> Option<MyToken> {
+    fn read(&self, input: &mut Input, _: &State, next: &mut State) -> ReaderOption<MyToken> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -92,15 +93,59 @@ impl Reader<MyToken> for IdentifierReader {
                     }
                 }
 
-                Some(Token::new(
+                if string.as_str() == "EMPTY" {
+                    ReaderOption::Empty
+                } else {
+                    ReaderOption::None
+                }
+            } else {
+                ReaderOption::None
+            },
+            None => ReaderOption::None,
+        }
+    }
+}
+
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct IdentifierReader;
+
+impl Reader<MyToken> for IdentifierReader {
+
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        2usize
+    }
+
+    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderOption<MyToken> {
+        match input.read(next) {
+            Some(ch) => if ch.is_alphabetic() {
+                let mut string = String::new();
+
+                string.push(ch);
+
+                while !input.done(next) {
+                    if let Some(ch) = input.peek(next, 0) {
+                        if ch.is_alphanumeric() {
+                            input.read(next);
+                            string.push(ch);
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+
+                ReaderOption::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Identifier,
                     TokenValue::Str(string)
                 ))
             } else {
-                None
+                ReaderOption::None
             },
-            None => None,
+            None => ReaderOption::None,
         }
     }
 }
@@ -110,10 +155,11 @@ impl Reader<MyToken> for IdentifierReader {
 fn test_lexer_whitespace() {
     let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
+        .add(EmptyReader)
         .add(IdentifierReader)
         .build();
 
-    let chars = "   \n\t   ".chars().collect::<Vec<char>>();
+    let chars = "EMPTY   \n\t   EMPTY".chars().collect::<Vec<char>>();
     let lexer = readers.lexer(chars);
     let tokens: Vec<MyToken> = lexer.collect();
 
@@ -121,9 +167,9 @@ fn test_lexer_whitespace() {
 
     let ws_token = &tokens[0];
     assert_eq!(ws_token.kind(), &TokenKind::Whitespace);
-    assert_eq!(ws_token.meta().col_start(), 1);
+    assert_eq!(ws_token.meta().col_start(), 5);
     assert_eq!(ws_token.meta().col_end(), 5);
-    assert_eq!(ws_token.meta().col_count(), 5);
+    assert_eq!(ws_token.meta().col_count(), 1);
     assert_eq!(ws_token.meta().line_start(), 1);
     assert_eq!(ws_token.meta().line_end(), 2);
     assert_eq!(ws_token.meta().line_count(), 2);
@@ -137,6 +183,7 @@ fn test_lexer_whitespace() {
 fn test_lexer_identifier() {
     let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
+        .add(EmptyReader)
         .add(IdentifierReader)
         .build();
 

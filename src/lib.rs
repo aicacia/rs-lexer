@@ -25,7 +25,7 @@ mod token;
 pub use self::chars::Chars;
 pub use self::input::Input;
 pub use self::lexer::Lexer;
-pub use self::reader::Reader;
+pub use self::reader::{Reader, ReaderOption};
 pub use self::readers_builder::ReadersBuilder;
 pub use self::readers::{Readers, ReadersIter};
 pub use self::state::State;
