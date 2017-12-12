@@ -1,6 +1,6 @@
 
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct State {
     index: usize,
     row: u64,
@@ -10,15 +10,21 @@ pub struct State {
 unsafe impl Send for State {}
 unsafe impl Sync for State {}
 
-impl State {
-
+impl Default for State {
     #[inline(always)]
-    pub(crate) fn new() -> Self {
+    fn default() -> Self {
         State {
             index: 0usize,
             row: 1u64,
             col: 1u64,
         }
+    }
+}
+
+impl State {
+    #[inline(always)]
+    pub fn new() -> Self {
+        Default::default()
     }
 
     #[inline(always)]
