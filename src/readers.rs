@@ -6,21 +6,21 @@ use core::slice;
 use super::{Lexer, Input, Reader, ReadersBuilder};
 
 
-pub struct Readers<T> {
-    vec: Vec<Box<Reader<T>>>,
+pub struct Readers<T, E> {
+    vec: Vec<Box<Reader<T, E>>>,
 }
 
-impl<T> From<ReadersBuilder<T>> for Readers<T> {
+impl<T, E> From<ReadersBuilder<T, E>> for Readers<T, E> {
 
     #[inline(always)]
-    fn from(readers_builder: ReadersBuilder<T>) -> Readers<T> {
+    fn from(readers_builder: ReadersBuilder<T, E>) -> Readers<T, E> {
         Readers {
             vec: readers_builder.vec,
         }
     }
 }
 
-impl<T> Readers<T> {
+impl<T, E> Readers<T, E> {
 
     #[inline(always)]
     pub fn new() -> Self {
@@ -30,12 +30,12 @@ impl<T> Readers<T> {
     }
 
     #[inline]
-    pub fn add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
+    pub fn add<R: 'static + Reader<T, E>>(&mut self, reader: R) -> &mut Self {
         self.no_sort_add(reader).sort()
     }
 
     #[inline]
-    pub fn no_sort_add<R: 'static + Reader<T>>(&mut self, reader: R) -> &mut Self {
+    pub fn no_sort_add<R: 'static + Reader<T, E>>(&mut self, reader: R) -> &mut Self {
         self.vec.push(Box::new(reader));
         self
     }
@@ -47,49 +47,91 @@ impl<T> Readers<T> {
     }
 
     #[inline(always)]
-    pub fn lexer<I>(&self, input: I) -> Lexer<T, I>
+    pub fn lexer<I>(&self, input: I) -> Lexer<T, E, I>
         where I: Input,
     {
         Lexer::new(self, input)
     }
 }
 
-impl<'a, T> Readers<T>
+impl<'a, T, E> Readers<T, E>
     where T: 'a,
+          E: 'a,
 {
     #[inline(always)]
-    pub fn iter(&'a self) -> ReadersIter<'a, T> {
+    pub fn iter(&'a self) -> ReadersIter<'a, T, E> {
         ReadersIter {
             iter: self.vec.iter(),
         }
     }
+    #[inline(always)]
+    pub fn iter_mut(&'a mut self) -> ReadersIterMut<'a, T, E> {
+        ReadersIterMut {
+            iter: self.vec.iter_mut(),
+        }
+    }
 }
 
-impl<'a, T> IntoIterator for &'a Readers<T>
+impl<'a, T, E> IntoIterator for &'a Readers<T, E>
     where T: 'a,
+          E: 'a,
 {
-    type Item = &'a Reader<T>;
-    type IntoIter = ReadersIter<'a, T>;
+    type Item = &'a Reader<T, E>;
+    type IntoIter = ReadersIter<'a, T, E>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 
-
-pub struct ReadersIter<'a, T>
+impl<'a, T, E> IntoIterator for &'a mut Readers<T, E>
     where T: 'a,
+          E: 'a,
 {
-    iter: slice::Iter<'a, Box<Reader<T>>>,
+    type Item = &'a mut (Reader<T, E> + 'static);
+    type IntoIter = ReadersIterMut<'a, T, E>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
 }
 
-impl<'a, T> Iterator for ReadersIter<'a, T>
+
+pub struct ReadersIter<'a, T, E>
     where T: 'a,
+          E: 'a,
 {
-    type Item = &'a Reader<T>;
+    iter: slice::Iter<'a, Box<Reader<T, E>>>,
+}
+
+impl<'a, T, E> Iterator for ReadersIter<'a, T, E>
+    where T: 'a,
+          E: 'a,
+{
+    type Item = &'a Reader<T, E>;
 
     #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|reader| &**reader)
+    }
+}
+
+
+pub struct ReadersIterMut<'a, T, E>
+    where T: 'a,
+          E: 'a,
+{
+    iter: slice::IterMut<'a, Box<Reader<T, E>>>,
+}
+
+impl<'a, T, E> Iterator for ReadersIterMut<'a, T, E>
+    where T: 'a,
+          E: 'a,
+{
+    type Item = &'a mut (Reader<T, E> + 'static);
+
+    #[inline(always)]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|reader| &mut **reader)
     }
 }

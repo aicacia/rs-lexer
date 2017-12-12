@@ -1,21 +1,23 @@
-use super::{Input, State, Readers, ReaderOption};
+use super::{Input, State, Readers, ReaderResult};
 
 
-pub struct Lexer<'a, T, I>
+pub struct Lexer<'a, T, E, I>
     where T: 'a,
+          E: 'a,
           I: 'a + Input,
 {
-    readers: &'a Readers<T>,
+    readers: &'a Readers<T, E>,
     state: State,
     input: I,
 }
 
-impl<'a, T, I> From<(&'a Readers<T>, I)> for Lexer<'a, T, I>
+impl<'a, T, E, I> From<(&'a Readers<T, E>, I)> for Lexer<'a, T, E, I>
     where T: 'a,
+          E: 'a,
           I: 'a + Input,
 {
     #[inline(always)]
-    fn from((readers, input): (&'a Readers<T>, I)) -> Self {
+    fn from((readers, input): (&'a Readers<T, E>, I)) -> Self {
         Lexer {
             readers: readers,
             state: State::new(),
@@ -24,21 +26,23 @@ impl<'a, T, I> From<(&'a Readers<T>, I)> for Lexer<'a, T, I>
     }
 }
 
-impl<'a, T, I> Lexer<'a, T, I>
+impl<'a, T, E, I> Lexer<'a, T, E, I>
     where T: 'a,
+          E: 'a,
           I: 'a + Input,
 {
     #[inline(always)]
-    pub fn new(readers: &'a Readers<T>, input: I) -> Self {
+    pub fn new(readers: &'a Readers<T, E>, input: I) -> Self {
         From::from((readers, input))
     }
 }
 
-impl<'a, T, I> Iterator for Lexer<'a, T, I>
+impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
     where T: 'a,
+          E: 'a,
           I: 'a + Input,
 {
-    type Item = T;
+    type Item = Result<T, E>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -54,17 +58,20 @@ impl<'a, T, I> Iterator for Lexer<'a, T, I>
                 let mut state = orig_state.clone();
 
                 match reader.read(&mut self.input, &self.state, &mut state) {
-                    ReaderOption::Some(t) => {
-                        token = Some(t);
+                    ReaderResult::Some(t) => {
+                        token = Some(Ok(t));
                         new_state = Some(state);
                         break;
                     },
-                    ReaderOption::Empty => {
+                    ReaderResult::Err(e) => {
+                        return Some(Err(e));
+                    },
+                    ReaderResult::Empty => {
                         new_state = Some(state);
                         is_empty = true;
                         break;
                     },
-                    ReaderOption::None => (),
+                    ReaderResult::None => (),
                 }
             }
 

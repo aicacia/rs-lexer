@@ -21,7 +21,7 @@ impl<I> Input for Chars<I>
         if index < self.index {
             Some(self.vec[index])
         } else if self.next().is_some() {
-            self.peek(state, offset)
+            self.char_at(index)
         } else {
             None
         }
@@ -46,6 +46,17 @@ impl<I> Chars<I>
 {
     #[inline(always)]
     pub fn new(iter: I) -> Self { From::from(iter) }
+
+    #[inline]
+    pub fn char_at(&mut self, index: usize) -> Option<char> {
+        if index < self.index {
+            Some(self.vec[index])
+        } else if self.next().is_some() {
+            self.char_at(index)
+        } else {
+            None
+        }
+    }
 }
 
 impl<I> Iterator for Chars<I>
@@ -74,16 +85,16 @@ impl<I> Iterator for Chars<I>
 mod __use_std {
     use super::*;
 
-    use std::io::{Read, Result, ErrorKind};
+    use std::io;
 
 
     impl<R> From<R> for Chars<CharsRead<R>>
-        where R: Read,
+        where R: io::Read,
     {
         #[inline(always)]
         fn from(reader: R) -> Self {
             Chars {
-                iter: CharsRead { inner: reader },
+                iter: CharsRead::from(reader),
                 index: 0,
                 vec: Vec::new(),
             }
@@ -91,59 +102,33 @@ mod __use_std {
     }
 
     pub struct CharsRead<R>
-        where R: Read,
+        where R: io::Read,
     {
-        inner: R,
+        chars: io::Chars<R>,
+    }
+
+    impl<R> From<R> for CharsRead<R>
+        where R: io::Read,
+    {
+        #[inline(always)]
+        fn from(reader: R) -> Self {
+            CharsRead {
+                chars: reader.chars(),
+            }
+        }
     }
 
     impl<R> Iterator for CharsRead<R>
-        where R: Read,
+        where R: io::Read,
     {
         type Item = char;
 
         #[inline]
         fn next(&mut self) -> Option<Self::Item> {
-            let first_byte = match read_one_byte(&mut self.inner) {
-                None => return None,
-                Some(Ok(b)) => b,
-                Some(Err(_)) => return None, // Some(Err(CharsError::Other(e))),
-            };
-            let width = ::core::str::utf8_char_width(first_byte);
-            if width == 1 {
-                return Some(first_byte as char);
+            match self.chars.next() {
+                Some(Ok(ch)) => Some(ch),
+                _ => None,
             }
-            if width == 0 {
-                return None; // Some(Err(CharsError::NotUtf8));
-            }
-            let mut buf = [first_byte, 0, 0, 0];
-            {
-                let mut start = 1;
-                while start < width {
-                    match self.inner.read(&mut buf[start..width]) {
-                        Ok(0) => return None, // Some(Err(CharsError::NotUtf8)),
-                        Ok(n) => start += n,
-                        Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
-                        Err(_) => return None, // Some(Err(CharsError::Other(e))),
-                    }
-                }
-            }
-            match ::std::str::from_utf8(&buf[..width]).ok() {
-                Some(s) => Some(s.chars().next().unwrap()),
-                None => None, // Err(CharsError::NotUtf8),
-            }
-        }
-    }
-
-    #[inline]
-    fn read_one_byte(reader: &mut Read) -> Option<Result<u8>> {
-        let mut buf = [0];
-        loop {
-            return match reader.read(&mut buf) {
-                Ok(0) => None,
-                Ok(..) => Some(Ok(buf[0])),
-                Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
-                Err(e) => Some(Err(e)),
-            };
         }
     }
 }

@@ -4,49 +4,42 @@ use super::TokenMeta;
 
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Token<T, V> {
+pub struct TokenError<E> {
     meta: TokenMeta,
-    kind: T,
-    value: V,
+    error: E,
 }
 
-unsafe impl<T, V> Send for Token<T, V>
-    where T: Send,
-          V: Send,
+unsafe impl<E> Send for TokenError<E>
+    where E: Send,
 {}
-unsafe impl<T, V> Sync for Token<T, V>
-    where T: Sync,
-          V: Sync,
+unsafe impl<E> Sync for TokenError<E>
+    where E: Sync,
 {}
 
-impl<T, V> Token<T, V> {
+impl<E> TokenError<E> {
     #[inline(always)]
-    pub fn new(meta: TokenMeta, kind: T, value: V) -> Self {
-        Token {
+    pub fn new(meta: TokenMeta, error: E) -> Self {
+        TokenError {
             meta: meta,
-            kind: kind,
-            value: value,
+            error: error,
         }
     }
 
     #[inline(always)]
     pub fn meta(&self) -> &TokenMeta { &self.meta }
     #[inline(always)]
-    pub fn kind(&self) -> &T { &self.kind }
-    #[inline(always)]
-    pub fn value(&self) -> &V { &self.value }
+    pub fn error(&self) -> &E { &self.error }
 }
 
-impl<T, V> fmt::Debug for Token<T, V>
-    where T: Debug,
-          V: Debug,
+impl<E> fmt::Debug for TokenError<E>
+    where E: Debug,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let meta = self.meta();
 
-        f.debug_struct("Token")
-            .field("value", &self.value)
+        f.debug_struct("TokenError")
+            .field("error", &self.error)
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())
@@ -56,16 +49,15 @@ impl<T, V> fmt::Debug for Token<T, V>
     }
 }
 
-impl<T, V> fmt::Display for Token<T, V>
-    where T: Display,
-          V: Display,
+impl<E> fmt::Display for TokenError<E>
+    where E: Display,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let meta = self.meta();
 
-        f.debug_struct("Token")
-            .field("value", &format!("{}", self.value))
+        f.debug_struct("TokenError")
+            .field("error", &format!("{}", self.error))
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())
