@@ -9,6 +9,15 @@ pub enum ReaderResult<T, E> {
     None,
 }
 
+unsafe impl<T, E> Send for ReaderResult<T, E>
+    where T: Send,
+          E: Send,
+{}
+unsafe impl<T, E> Sync for ReaderResult<T, E>
+    where T: Send,
+          E: Send,
+{}
+
 
 pub trait Reader<T, E> {
 

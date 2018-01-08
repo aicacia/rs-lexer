@@ -8,43 +8,41 @@ use chars_input::Input;
 use super::{Lexer, Reader, ReadersBuilder};
 
 
-pub struct Readers<T, E> {
-    vec: Vec<Box<Reader<T, E>>>,
-}
+pub struct Readers<T, E>(Vec<Box<Reader<T, E>>>);
+
+unsafe impl<T, E> Sync for Readers<T, E>
+    where T: Sync,
+          E: Sync,
+{}
+unsafe impl<T, E> Send for Readers<T, E>
+    where T: Send,
+          E: Send,
+{}
 
 impl<T, E> From<ReadersBuilder<T, E>> for Readers<T, E> {
-
     #[inline(always)]
     fn from(readers_builder: ReadersBuilder<T, E>) -> Readers<T, E> {
-        Readers {
-            vec: readers_builder.vec,
-        }
+        Readers(readers_builder.0)
     }
 }
 
 impl<T, E> Readers<T, E> {
-
     #[inline(always)]
     pub fn new() -> Self {
-        Readers {
-            vec: Vec::new(),
-        }
+        Readers(Vec::new())
     }
 
     #[inline]
     pub fn add<R: 'static + Reader<T, E>>(&mut self, reader: R) -> &mut Self {
-        self.no_sort_add(reader).sort()
-    }
+        let index = self.0.iter().position(|r| reader.priority() < r.priority());
+        let boxed_reader = Box::new(reader);
 
-    #[inline]
-    pub fn no_sort_add<R: 'static + Reader<T, E>>(&mut self, reader: R) -> &mut Self {
-        self.vec.push(Box::new(reader));
-        self
-    }
+        if let Some(index) = index {
+            self.0.insert(index, boxed_reader);
+        } else {
+            self.0.push(boxed_reader);
+        }
 
-    #[inline]
-    fn sort(&mut self) -> &mut Self {
-        self.vec.sort_by(|a, b| a.priority().cmp(&b.priority()));
         self
     }
 
@@ -63,13 +61,13 @@ impl<'a, T, E> Readers<T, E>
     #[inline(always)]
     pub fn iter(&'a self) -> ReadersIter<'a, T, E> {
         ReadersIter {
-            iter: self.vec.iter(),
+            iter: self.0.iter(),
         }
     }
     #[inline(always)]
     pub fn iter_mut(&'a mut self) -> ReadersIterMut<'a, T, E> {
         ReadersIterMut {
-            iter: self.vec.iter_mut(),
+            iter: self.0.iter_mut(),
         }
     }
 }

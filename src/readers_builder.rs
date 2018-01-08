@@ -4,28 +4,40 @@ use alloc::vec::Vec;
 use super::{Reader, Readers};
 
 
-pub struct ReadersBuilder<T, E> {
-    pub(crate) vec: Vec<Box<Reader<T, E>>>,
-}
+pub struct ReadersBuilder<T, E>(pub(crate) Vec<Box<Reader<T, E>>>);
+
+unsafe impl<T, E> Sync for ReadersBuilder<T, E>
+    where T: Sync,
+          E: Sync,
+{}
+unsafe impl<T, E> Send for ReadersBuilder<T, E>
+    where T: Send,
+          E: Send,
+{}
 
 impl<T, E> ReadersBuilder<T, E> {
 
     #[inline(always)]
     pub fn new() -> Self {
-        ReadersBuilder {
-            vec: Vec::new(),
-        }
+        ReadersBuilder(Vec::new())
     }
 
     #[inline]
     pub fn add<R: 'static + Reader<T, E>>(mut self, reader: R) -> Self {
-        self.vec.push(Box::new(reader));
+        let index = self.0.iter().position(|r| reader.priority() < r.priority());
+        let boxed_reader = Box::new(reader);
+
+        if let Some(index) = index {
+            self.0.insert(index, boxed_reader);
+        } else {
+            self.0.push(boxed_reader);
+        }
+
         self
     }
 
     #[inline]
-    pub fn build(mut self) -> Readers<T, E> {
-        self.vec.sort_by(|a, b| a.priority().cmp(&b.priority()));
+    pub fn build(self) -> Readers<T, E> {
         Readers::from(self)
     }
 }

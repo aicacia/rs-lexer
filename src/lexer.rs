@@ -13,6 +13,17 @@ pub struct Lexer<'a, T, E, I>
     input: I,
 }
 
+unsafe impl<'a, T, E, I> Sync for Lexer<'a, T, E, I>
+    where T: 'a + Sync,
+          E: 'a + Sync,
+          I: 'a + Sync + Input,
+{}
+unsafe impl<'a, T, E, I> Send for Lexer<'a, T, E, I>
+    where T: 'a + Send,
+          E: 'a + Send,
+          I: 'a + Send + Input,
+{}
+
 impl<'a, T, E, I> From<(&'a Readers<T, E>, I)> for Lexer<'a, T, E, I>
     where T: 'a,
           E: 'a,
