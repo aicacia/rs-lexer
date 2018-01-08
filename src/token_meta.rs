@@ -1,6 +1,6 @@
 use core::fmt;
 
-use super::State;
+use chars_input::State;
 
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -27,11 +27,11 @@ impl TokenMeta {
         line_start: u64,
         line_end: u64
     ) -> Self {
-        assert!(
+        debug_assert!(
             index_end > index_start,
             "token meta error: end index cannot be less than the start row of a token."
         );
-        assert!(
+        debug_assert!(
             line_end >= line_start,
             "token meta error: end line cannot be less than the start line of a token."
         );

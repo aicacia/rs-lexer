@@ -3,7 +3,6 @@ lexer
 
 plugin based lexical reader
 
-
 ```rust
 extern crate lexer;
 
@@ -43,14 +42,10 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
                 string.push(ch);
 
-                while !input.done(next) {
-                    if let Some(ch) = input.peek(next, 0) {
-                        if ch.is_whitespace() {
-                            input.read(next);
-                            string.push(ch);
-                        } else {
-                            break;
-                        }
+                while let Some(ch) = input.peek(next, 0) {
+                    if ch.is_whitespace() {
+                        input.read(next);
+                        string.push(ch);
                     } else {
                         break;
                     }
@@ -85,14 +80,10 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 
                 string.push(ch);
 
-                while !input.done(next) {
-                    if let Some(ch) = input.peek(next, 0) {
-                        if ch.is_alphanumeric() {
-                            input.read(next);
-                            string.push(ch);
-                        } else {
-                            break;
-                        }
+                while let Some(ch) = input.peek(next, 0) {
+                    if ch.is_alphanumeric() {
+                        input.read(next);
+                        string.push(ch);
                     } else {
                         break;
                     }

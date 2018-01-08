@@ -1,4 +1,6 @@
-use super::{Input, State, Readers, ReaderResult};
+use chars_input::{Input, State};
+
+use super::{Readers, ReaderResult};
 
 
 pub struct Lexer<'a, T, E, I>
@@ -46,7 +48,7 @@ impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.input.done(&self.state) {
+        if self.input.is_done(&self.state) {
             None
         } else {
             let mut token = None;
@@ -82,8 +84,8 @@ impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
             if is_empty {
                 self.next()
             } else {
-                assert!(
-                    orig_state.index() != self.state.index() || self.input.done(&self.state),
+                debug_assert!(
+                    orig_state.index() != self.state.index() || self.input.is_done(&self.state),
                     "Lexer: No reader was able to read at {:?}",
                     orig_state
                 );

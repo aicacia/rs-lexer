@@ -1,4 +1,4 @@
-use super::{Input, State};
+use chars_input::{Input, State};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]

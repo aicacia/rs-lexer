@@ -3,7 +3,9 @@ use alloc::vec::Vec;
 
 use core::slice;
 
-use super::{Lexer, Input, Reader, ReadersBuilder};
+use chars_input::Input;
+
+use super::{Lexer, Reader, ReadersBuilder};
 
 
 pub struct Readers<T, E> {
