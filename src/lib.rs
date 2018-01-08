@@ -30,4 +30,4 @@ pub use self::readers::{Readers, ReadersIter};
 pub use self::token_error::TokenError;
 pub use self::token_meta::TokenMeta;
 pub use self::token::Token;
-pub use chars_input::{State, Chars, Input};
+pub use chars_input::{State, Chars, Input, Lines};
