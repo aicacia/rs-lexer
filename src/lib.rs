@@ -23,6 +23,8 @@ mod token_meta;
 mod token;
 
 
+pub use chars_input::*;
+
 pub use self::lexer::Lexer;
 pub use self::reader::{Reader, ReaderResult};
 pub use self::readers_builder::ReadersBuilder;
@@ -30,4 +32,3 @@ pub use self::readers::{Readers, ReadersIter};
 pub use self::token_error::TokenError;
 pub use self::token_meta::TokenMeta;
 pub use self::token::Token;
-pub use chars_input::{State, Chars, Input, Lines};
