@@ -47,6 +47,7 @@ impl<T, V> fmt::Debug for Token<T, V>
 
         f.debug_struct("Token")
             .field("value", &self.value)
+            .field("kind", &self.kind)
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())
@@ -66,6 +67,7 @@ impl<T, V> fmt::Display for Token<T, V>
 
         f.debug_struct("Token")
             .field("value", &format!("{}", self.value))
+            .field("kind", &format!("{}", self.kind))
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())
