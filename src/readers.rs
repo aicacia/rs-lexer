@@ -3,21 +3,24 @@ use alloc::vec::Vec;
 
 use core::slice;
 
-use chars_input::Input;
+use peek_nth::IteratorExt;
 
 use super::{Lexer, Reader, ReadersBuilder};
-
 
 pub struct Readers<T, E>(Vec<Box<Reader<T, E>>>);
 
 unsafe impl<T, E> Sync for Readers<T, E>
-    where T: Sync,
-          E: Sync,
-{}
+where
+    T: Sync,
+    E: Sync,
+{
+}
 unsafe impl<T, E> Send for Readers<T, E>
-    where T: Send,
-          E: Send,
-{}
+where
+    T: Send,
+    E: Send,
+{
+}
 
 impl<T, E> From<ReadersBuilder<T, E>> for Readers<T, E> {
     #[inline(always)]
@@ -48,15 +51,17 @@ impl<T, E> Readers<T, E> {
 
     #[inline(always)]
     pub fn lexer<I>(&self, input: I) -> Lexer<T, E, I>
-        where I: Input,
+    where
+        I: IteratorExt<Item = char>,
     {
         Lexer::new(self, input)
     }
 }
 
 impl<'a, T, E> Readers<T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     #[inline(always)]
     pub fn iter(&'a self) -> ReadersIter<'a, T, E> {
@@ -73,8 +78,9 @@ impl<'a, T, E> Readers<T, E>
 }
 
 impl<'a, T, E> IntoIterator for &'a Readers<T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     type Item = &'a Reader<T, E>;
     type IntoIter = ReadersIter<'a, T, E>;
@@ -85,8 +91,9 @@ impl<'a, T, E> IntoIterator for &'a Readers<T, E>
 }
 
 impl<'a, T, E> IntoIterator for &'a mut Readers<T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     type Item = &'a mut (Reader<T, E> + 'static);
     type IntoIter = ReadersIterMut<'a, T, E>;
@@ -96,17 +103,18 @@ impl<'a, T, E> IntoIterator for &'a mut Readers<T, E>
     }
 }
 
-
 pub struct ReadersIter<'a, T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     iter: slice::Iter<'a, Box<Reader<T, E>>>,
 }
 
 impl<'a, T, E> Iterator for ReadersIter<'a, T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     type Item = &'a Reader<T, E>;
 
@@ -116,17 +124,18 @@ impl<'a, T, E> Iterator for ReadersIter<'a, T, E>
     }
 }
 
-
 pub struct ReadersIterMut<'a, T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     iter: slice::IterMut<'a, Box<Reader<T, E>>>,
 }
 
 impl<'a, T, E> Iterator for ReadersIterMut<'a, T, E>
-    where T: 'a,
-          E: 'a,
+where
+    T: 'a,
+    E: 'a,
 {
     type Item = &'a mut (Reader<T, E> + 'static);
 

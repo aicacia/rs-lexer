@@ -1,8 +1,8 @@
+#![feature(io)]
+
 extern crate lexer;
 
-
 use lexer::*;
-
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenKind {
@@ -19,18 +19,21 @@ pub enum TokenValue {
 pub type MyToken = Token<TokenKind, TokenValue>;
 pub type MyError = TokenError<&'static str>;
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
 impl Reader<MyToken, MyError> for WhitespaceReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -49,7 +52,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Whitespace,
-                    TokenValue::Str(string)
+                    TokenValue::Str(string),
                 ))
             } else {
                 ReaderResult::None
@@ -59,18 +62,21 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
     }
 }
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct EmptyReader;
 
 impl Reader<MyToken, MyError> for EmptyReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
     }
 
-    fn read(&self, input: &mut Input, _: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        _: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -99,18 +105,21 @@ impl Reader<MyToken, MyError> for EmptyReader {
     }
 }
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct IdentifierReader;
 
 impl Reader<MyToken, MyError> for IdentifierReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         2usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -129,7 +138,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Identifier,
-                    TokenValue::Str(string)
+                    TokenValue::Str(string),
                 ))
             } else {
                 ReaderResult::None
@@ -139,7 +148,6 @@ impl Reader<MyToken, MyError> for IdentifierReader {
     }
 }
 
-
 #[test]
 fn test_lexer_whitespace() {
     let readers = ReadersBuilder::new()
@@ -148,8 +156,7 @@ fn test_lexer_whitespace() {
         .add(IdentifierReader)
         .build();
 
-    let chars = "EMPTY   \n\t   EMPTY".chars().collect::<Vec<char>>();
-    let lexer = readers.lexer(chars);
+    let lexer = readers.lexer("EMPTY   \n\t   EMPTY".chars());
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     assert_eq!(tokens.len(), 1);
@@ -170,13 +177,22 @@ fn test_lexer_whitespace() {
 
 #[test]
 fn test_lexer_identifier() {
+    use std::fs::File;
+    use std::io::Read;
+
     let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
         .add(EmptyReader)
         .add(IdentifierReader)
         .build();
 
-    let chars = Chars::from(::std::fs::File::open("tests/file.txt").unwrap());
+    let chars = File::open("tests/file.txt")
+        .unwrap()
+        .chars()
+        .map(|r| match r {
+            Ok(ch) => ch,
+            Err(e) => panic!("{:?}", e),
+        });
     let lexer = readers.lexer(chars);
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 

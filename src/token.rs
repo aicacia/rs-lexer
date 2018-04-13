@@ -2,7 +2,6 @@ use core::fmt::{self, Debug, Display};
 
 use super::TokenMeta;
 
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Token<T, V> {
     meta: TokenMeta,
@@ -11,13 +10,17 @@ pub struct Token<T, V> {
 }
 
 unsafe impl<T, V> Send for Token<T, V>
-    where T: Send,
-          V: Send,
-{}
+where
+    T: Send,
+    V: Send,
+{
+}
 unsafe impl<T, V> Sync for Token<T, V>
-    where T: Sync,
-          V: Sync,
-{}
+where
+    T: Sync,
+    V: Sync,
+{
+}
 
 impl<T, V> Token<T, V> {
     #[inline(always)]
@@ -30,16 +33,23 @@ impl<T, V> Token<T, V> {
     }
 
     #[inline(always)]
-    pub fn meta(&self) -> &TokenMeta { &self.meta }
+    pub fn meta(&self) -> &TokenMeta {
+        &self.meta
+    }
     #[inline(always)]
-    pub fn kind(&self) -> &T { &self.kind }
+    pub fn kind(&self) -> &T {
+        &self.kind
+    }
     #[inline(always)]
-    pub fn value(&self) -> &V { &self.value }
+    pub fn value(&self) -> &V {
+        &self.value
+    }
 }
 
 impl<T, V> fmt::Debug for Token<T, V>
-    where T: Debug,
-          V: Debug,
+where
+    T: Debug,
+    V: Debug,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -58,8 +68,9 @@ impl<T, V> fmt::Debug for Token<T, V>
 }
 
 impl<T, V> fmt::Display for Token<T, V>
-    where T: Display,
-          V: Display,
+where
+    T: Display,
+    V: Display,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

@@ -1,5 +1,4 @@
-use chars_input::{Input, State};
-
+use super::{Input, State};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ReaderResult<T, E> {
@@ -10,17 +9,19 @@ pub enum ReaderResult<T, E> {
 }
 
 unsafe impl<T, E> Send for ReaderResult<T, E>
-    where T: Send,
-          E: Send,
-{}
+where
+    T: Send,
+    E: Send,
+{
+}
 unsafe impl<T, E> Sync for ReaderResult<T, E>
-    where T: Send,
-          E: Send,
-{}
-
+where
+    T: Send,
+    E: Send,
+{
+}
 
 pub trait Reader<T, E> {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize

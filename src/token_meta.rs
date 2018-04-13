@@ -1,7 +1,6 @@
 use core::fmt;
 
-use chars_input::State;
-
+use super::State;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TokenMeta {
@@ -17,7 +16,6 @@ unsafe impl Send for TokenMeta {}
 unsafe impl Sync for TokenMeta {}
 
 impl TokenMeta {
-
     #[inline]
     pub fn new(
         index_start: u64,
@@ -25,7 +23,7 @@ impl TokenMeta {
         col_start: u64,
         col_end: u64,
         line_start: u64,
-        line_end: u64
+        line_end: u64,
     ) -> Self {
         debug_assert!(
             index_end > index_start,
@@ -54,29 +52,45 @@ impl TokenMeta {
             current_state.col(),
             state.col(),
             current_state.row(),
-            state.row()
+            state.row(),
         )
     }
 
     #[inline(always)]
-    pub fn index_start(&self) -> u64 { self.index_start }
+    pub fn index_start(&self) -> u64 {
+        self.index_start
+    }
     #[inline(always)]
-    pub fn index_end(&self) -> u64 { self.index_end }
+    pub fn index_end(&self) -> u64 {
+        self.index_end
+    }
 
     #[inline(always)]
-    pub fn row_start(&self) -> u64 { self.line_start }
+    pub fn row_start(&self) -> u64 {
+        self.line_start
+    }
     #[inline(always)]
-    pub fn row_end(&self) -> u64 { self.line_end }
+    pub fn row_end(&self) -> u64 {
+        self.line_end
+    }
 
     #[inline(always)]
-    pub fn col_start(&self) -> u64 { self.col_start }
+    pub fn col_start(&self) -> u64 {
+        self.col_start
+    }
     #[inline(always)]
-    pub fn col_end(&self) -> u64 { self.col_end }
+    pub fn col_end(&self) -> u64 {
+        self.col_end
+    }
 
     #[inline(always)]
-    pub fn line_start(&self) -> u64 { self.line_start }
+    pub fn line_start(&self) -> u64 {
+        self.line_start
+    }
     #[inline(always)]
-    pub fn line_end(&self) -> u64 { self.line_end }
+    pub fn line_end(&self) -> u64 {
+        self.line_end
+    }
 
     #[inline(always)]
     pub fn len(&self) -> u64 {

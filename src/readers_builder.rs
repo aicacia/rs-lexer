@@ -3,20 +3,22 @@ use alloc::vec::Vec;
 
 use super::{Reader, Readers};
 
-
 pub struct ReadersBuilder<T, E>(pub(crate) Vec<Box<Reader<T, E>>>);
 
 unsafe impl<T, E> Sync for ReadersBuilder<T, E>
-    where T: Sync,
-          E: Sync,
-{}
+where
+    T: Sync,
+    E: Sync,
+{
+}
 unsafe impl<T, E> Send for ReadersBuilder<T, E>
-    where T: Send,
-          E: Send,
-{}
+where
+    T: Send,
+    E: Send,
+{
+}
 
 impl<T, E> ReadersBuilder<T, E> {
-
     #[inline(always)]
     pub fn new() -> Self {
         ReadersBuilder(Vec::new())

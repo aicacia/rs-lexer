@@ -2,7 +2,6 @@ use core::fmt::{self, Debug, Display};
 
 use super::TokenMeta;
 
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TokenError<E> {
     meta: TokenMeta,
@@ -10,11 +9,15 @@ pub struct TokenError<E> {
 }
 
 unsafe impl<E> Send for TokenError<E>
-    where E: Send,
-{}
+where
+    E: Send,
+{
+}
 unsafe impl<E> Sync for TokenError<E>
-    where E: Sync,
-{}
+where
+    E: Sync,
+{
+}
 
 impl<E> TokenError<E> {
     #[inline(always)]
@@ -26,13 +29,18 @@ impl<E> TokenError<E> {
     }
 
     #[inline(always)]
-    pub fn meta(&self) -> &TokenMeta { &self.meta }
+    pub fn meta(&self) -> &TokenMeta {
+        &self.meta
+    }
     #[inline(always)]
-    pub fn error(&self) -> &E { &self.error }
+    pub fn error(&self) -> &E {
+        &self.error
+    }
 }
 
 impl<E> fmt::Debug for TokenError<E>
-    where E: Debug,
+where
+    E: Debug,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -50,7 +58,8 @@ impl<E> fmt::Debug for TokenError<E>
 }
 
 impl<E> fmt::Display for TokenError<E>
-    where E: Display,
+where
+    E: Display,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

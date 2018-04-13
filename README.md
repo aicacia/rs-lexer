@@ -109,8 +109,7 @@ fn main() {
         .add(IdentifierReader)
         .build();
 
-    let vec: Vec<char> = "Hello world\n".chars().collect();
-    let lexer = readers.lexer(vec);
+    let lexer = readers.lexer("Hello world\n".chars());
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     println!("{:#?}", tokens);

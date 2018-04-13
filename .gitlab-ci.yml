@@ -1,4 +1,4 @@
-image: "scorpil/rust:nightly"
+image: "rustlang/rust:nightly"
 
 
 test:cargo:

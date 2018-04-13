@@ -1,59 +1,66 @@
-use chars_input::{Input, State};
+use peek_nth::{IteratorExt, PeekableNth};
 
-use super::{Readers, ReaderResult};
-
+use super::{Input, ReaderResult, Readers, State};
 
 pub struct Lexer<'a, T, E, I>
-    where T: 'a,
-          E: 'a,
-          I: 'a + Input,
+where
+    T: 'a,
+    E: 'a,
+    I: 'a + IteratorExt<Item = char>,
 {
     readers: &'a Readers<T, E>,
     state: State,
-    input: I,
+    input: PeekableNth<I>,
 }
 
 unsafe impl<'a, T, E, I> Sync for Lexer<'a, T, E, I>
-    where T: 'a + Sync,
-          E: 'a + Sync,
-          I: 'a + Sync + Input,
-{}
+where
+    T: 'a + Sync,
+    E: 'a + Sync,
+    I: 'a + Sync + IteratorExt<Item = char>,
+{
+}
 unsafe impl<'a, T, E, I> Send for Lexer<'a, T, E, I>
-    where T: 'a + Send,
-          E: 'a + Send,
-          I: 'a + Send + Input,
-{}
+where
+    T: 'a + Send,
+    E: 'a + Send,
+    I: 'a + Send + IteratorExt<Item = char>,
+{
+}
 
 impl<'a, T, E, I> From<(&'a Readers<T, E>, I)> for Lexer<'a, T, E, I>
-    where T: 'a,
-          E: 'a,
-          I: 'a + Input,
+where
+    T: 'a,
+    E: 'a,
+    I: 'a + IteratorExt<Item = char>,
 {
     #[inline(always)]
-    fn from((readers, input): (&'a Readers<T, E>, I)) -> Self {
+    fn from((readers, iter): (&'a Readers<T, E>, I)) -> Self {
         Lexer {
             readers: readers,
             state: State::new(),
-            input: input,
+            input: iter.peekable_nth(),
         }
     }
 }
 
 impl<'a, T, E, I> Lexer<'a, T, E, I>
-    where T: 'a,
-          E: 'a,
-          I: 'a + Input,
+where
+    T: 'a,
+    E: 'a,
+    I: 'a + IteratorExt<Item = char>,
 {
     #[inline(always)]
-    pub fn new(readers: &'a Readers<T, E>, input: I) -> Self {
-        From::from((readers, input))
+    pub fn new(readers: &'a Readers<T, E>, iter: I) -> Self {
+        From::from((readers, iter))
     }
 }
 
 impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
-    where T: 'a,
-          E: 'a,
-          I: 'a + Input,
+where
+    T: 'a,
+    E: 'a,
+    I: 'a + IteratorExt<Item = char>,
 {
     type Item = Result<T, E>;
 
@@ -75,15 +82,15 @@ impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
                         token = Some(Ok(t));
                         new_state = Some(state);
                         break;
-                    },
+                    }
                     ReaderResult::Err(e) => {
                         return Some(Err(e));
-                    },
+                    }
                     ReaderResult::Empty => {
                         new_state = Some(state);
                         is_empty = true;
                         break;
-                    },
+                    }
                     ReaderResult::None => (),
                 }
             }
