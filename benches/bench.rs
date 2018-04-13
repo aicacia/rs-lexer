@@ -1,15 +1,12 @@
 #![feature(test)]
 
-
 extern crate test;
 
 extern crate lexer;
 
-
 use test::Bencher;
 
 use lexer::*;
-
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenKind {
@@ -26,18 +23,21 @@ pub enum TokenValue {
 pub type MyToken = Token<TokenKind, TokenValue>;
 pub type MyError = TokenError<&'static str>;
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
 impl Reader<MyToken, MyError> for WhitespaceReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -56,7 +56,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Whitespace,
-                    TokenValue::Str(string)
+                    TokenValue::Str(string),
                 ))
             } else {
                 ReaderResult::None
@@ -70,13 +70,17 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 pub struct IdentifierReader;
 
 impl Reader<MyToken, MyError> for IdentifierReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -95,7 +99,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
                     TokenKind::Identifier,
-                    TokenValue::Str(string)
+                    TokenValue::Str(string),
                 ))
             } else {
                 ReaderResult::None
@@ -105,7 +109,6 @@ impl Reader<MyToken, MyError> for IdentifierReader {
     }
 }
 
-
 #[bench]
 fn bench_lexer(b: &mut Bencher) {
     let readers = ReadersBuilder::new()
@@ -113,24 +116,8 @@ fn bench_lexer(b: &mut Bencher) {
         .add(IdentifierReader)
         .build();
 
-    let vec = " def  \n\t   name ".chars().collect::<Vec<char>>();
-
     b.iter(|| {
-        let lexer = readers.lexer(&vec);
-        let _: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
-    });
-}
-
-#[bench]
-fn bench_lexer_full(b: &mut Bencher) {
-    b.iter(|| {
-        let readers = ReadersBuilder::new()
-            .add(WhitespaceReader)
-            .add(IdentifierReader)
-            .build();
-
-        let vec = " def  \n\t   name ".chars().collect::<Vec<char>>();
-        let lexer = readers.lexer(&vec);
+        let lexer = readers.lexer(" def  \n\t   name ".chars());
         let _: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
     });
 }

@@ -99,7 +99,7 @@ impl TokenMeta {
 
     #[inline(always)]
     pub fn line_count(&self) -> u64 {
-        (self.line_end - self.line_start) + 1
+        self.line_end - self.line_start
     }
 
     #[inline(always)]

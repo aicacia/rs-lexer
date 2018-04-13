@@ -9,7 +9,7 @@ unsafe impl Send for State {}
 unsafe impl Sync for State {}
 
 impl Default for State {
-    #[inline(always)]
+    #[inline]
     fn default() -> Self {
         State {
             index: 0usize,

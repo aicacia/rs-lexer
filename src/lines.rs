@@ -2,34 +2,35 @@ use alloc::string::String;
 
 use super::{Input, State};
 
-pub struct Lines<'a, I>
-where
-    I: 'a + Input,
-{
+pub struct Lines<'a> {
     state: &'a mut State,
-    input: &'a mut I,
+    input: &'a mut Input,
 }
 
-impl<'a, I> Lines<'a, I>
-where
-    I: 'a + Input,
-{
+impl<'a> Lines<'a> {
     #[inline(always)]
-    pub fn new(input: &'a mut I, state: &'a mut State) -> Self {
+    pub fn new(input: &'a mut Input, state: &'a mut State) -> Self {
         Lines {
             state: state,
             input: input,
         }
     }
+
+    #[inline]
+    pub fn peek_line(&mut self) -> Option<String> {
+        self.input.peek_line(self.state)
+    }
+
+    #[inline]
+    pub fn skip_line(&mut self) {
+        self.input.read_line(self.state);
+    }
 }
 
-impl<'a, I> Iterator for Lines<'a, I>
-where
-    I: 'a + Input,
-{
+impl<'a> Iterator for Lines<'a> {
     type Item = String;
 
-    #[inline(always)]
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.input.read_line(self.state)
     }

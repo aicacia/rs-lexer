@@ -6,12 +6,14 @@ use lexer::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenKind {
+    EmptyLines,
     Whitespace,
     Identifier,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenValue {
+    Num(usize),
     Chr(char),
     Str(String),
 }
@@ -20,12 +22,54 @@ pub type MyToken = Token<TokenKind, TokenValue>;
 pub type MyError = TokenError<&'static str>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct EmptyLineReader;
+
+impl Reader<MyToken, MyError> for EmptyLineReader {
+    #[inline(always)]
+    fn priority(&self) -> usize {
+        0usize
+    }
+
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
+        let mut count = 0;
+
+        {
+            let mut lines = input.lines(next);
+
+            while let Some(line) = lines.peek_line() {
+                if line.is_empty() {
+                    lines.skip_line();
+                    count += 1;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if count > 1 {
+            ReaderResult::Some(Token::new(
+                TokenMeta::new_state_meta(current, next),
+                TokenKind::EmptyLines,
+                TokenValue::Num(count),
+            ))
+        } else {
+            ReaderResult::None
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
 impl Reader<MyToken, MyError> for WhitespaceReader {
     #[inline(always)]
     fn priority(&self) -> usize {
-        0usize
+        1usize
     }
 
     fn read(
@@ -68,7 +112,7 @@ pub struct EmptyReader;
 impl Reader<MyToken, MyError> for EmptyReader {
     #[inline(always)]
     fn priority(&self) -> usize {
-        1usize
+        2usize
     }
 
     fn read(
@@ -111,7 +155,7 @@ pub struct IdentifierReader;
 impl Reader<MyToken, MyError> for IdentifierReader {
     #[inline(always)]
     fn priority(&self) -> usize {
-        2usize
+        3usize
     }
 
     fn read(
@@ -149,11 +193,40 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 }
 
 #[test]
+fn test_lexer_newlines() {
+    let readers = ReadersBuilder::new()
+        .add(WhitespaceReader)
+        .add(EmptyReader)
+        .add(IdentifierReader)
+        .add(EmptyLineReader)
+        .build();
+
+    let lexer = readers.lexer("\n\n\nHello\n".chars());
+    let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
+
+    assert_eq!(tokens.len(), 3);
+
+    let ws_token = &tokens[0];
+    assert_eq!(ws_token.kind(), &TokenKind::EmptyLines);
+    assert_eq!(ws_token.meta().col_start(), 1);
+    assert_eq!(ws_token.meta().col_end(), 1);
+    assert_eq!(ws_token.meta().col_count(), 1);
+    assert_eq!(ws_token.meta().line_start(), 1);
+    assert_eq!(ws_token.meta().line_end(), 4);
+    assert_eq!(ws_token.meta().line_count(), 3);
+    assert_eq!(ws_token.meta().len(), 3);
+    if let &TokenValue::Num(ref count) = ws_token.value() {
+        assert_eq!(count, &3);
+    }
+}
+
+#[test]
 fn test_lexer_whitespace() {
     let readers = ReadersBuilder::new()
         .add(WhitespaceReader)
         .add(EmptyReader)
         .add(IdentifierReader)
+        .add(EmptyLineReader)
         .build();
 
     let lexer = readers.lexer("EMPTY   \n\t   EMPTY".chars());
@@ -168,7 +241,7 @@ fn test_lexer_whitespace() {
     assert_eq!(ws_token.meta().col_count(), 1);
     assert_eq!(ws_token.meta().line_start(), 1);
     assert_eq!(ws_token.meta().line_end(), 2);
-    assert_eq!(ws_token.meta().line_count(), 2);
+    assert_eq!(ws_token.meta().line_count(), 1);
     assert_eq!(ws_token.meta().len(), 8);
     if let &TokenValue::Str(ref string) = ws_token.value() {
         assert_eq!(string.len(), 8);
@@ -184,6 +257,7 @@ fn test_lexer_identifier() {
         .add(WhitespaceReader)
         .add(EmptyReader)
         .add(IdentifierReader)
+        .add(EmptyLineReader)
         .build();
 
     let chars = File::open("tests/file.txt")
@@ -205,7 +279,7 @@ fn test_lexer_identifier() {
     assert_eq!(ident_token.meta().col_count(), 3);
     assert_eq!(ident_token.meta().line_start(), 1);
     assert_eq!(ident_token.meta().line_end(), 1);
-    assert_eq!(ident_token.meta().line_count(), 1);
+    assert_eq!(ident_token.meta().line_count(), 0);
     assert_eq!(ident_token.meta().len(), 3);
     if let &TokenValue::Str(ref string) = ident_token.value() {
         assert_eq!(string, "def");

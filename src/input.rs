@@ -6,6 +6,7 @@ use super::{Lines, State};
 
 pub trait Input {
     fn peek(&mut self, state: &State, offset: usize) -> Option<char>;
+    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a>;
 
     #[inline]
     fn read(&mut self, state: &mut State) -> Option<char> {
@@ -73,14 +74,6 @@ pub trait Input {
     }
 
     #[inline]
-    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a, Self>
-    where
-        Self: Sized,
-    {
-        Lines::new(self, state)
-    }
-
-    #[inline]
     fn is_done(&mut self, state: &State) -> bool {
         self.peek(state, 0).is_none()
     }
@@ -98,5 +91,9 @@ where
     #[inline]
     fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
         self.peek_nth(state.index() + offset).map(Clone::clone)
+    }
+    #[inline]
+    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
+        Lines::new(self, state)
     }
 }

@@ -19,7 +19,7 @@ where
 }
 
 impl<T, E> ReadersBuilder<T, E> {
-    #[inline(always)]
+    #[inline]
     pub fn new() -> Self {
         ReadersBuilder(Vec::new())
     }

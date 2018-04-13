@@ -23,14 +23,14 @@ where
 }
 
 impl<T, E> From<ReadersBuilder<T, E>> for Readers<T, E> {
-    #[inline(always)]
+    #[inline]
     fn from(readers_builder: ReadersBuilder<T, E>) -> Readers<T, E> {
         Readers(readers_builder.0)
     }
 }
 
 impl<T, E> Readers<T, E> {
-    #[inline(always)]
+    #[inline]
     pub fn new() -> Self {
         Readers(Vec::new())
     }
@@ -49,7 +49,7 @@ impl<T, E> Readers<T, E> {
         self
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn lexer<I>(&self, input: I) -> Lexer<T, E, I>
     where
         I: IteratorExt<Item = char>,
@@ -63,13 +63,13 @@ where
     T: 'a,
     E: 'a,
 {
-    #[inline(always)]
+    #[inline]
     pub fn iter(&'a self) -> ReadersIter<'a, T, E> {
         ReadersIter {
             iter: self.0.iter(),
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn iter_mut(&'a mut self) -> ReadersIterMut<'a, T, E> {
         ReadersIterMut {
             iter: self.0.iter_mut(),
@@ -85,6 +85,7 @@ where
     type Item = &'a Reader<T, E>;
     type IntoIter = ReadersIter<'a, T, E>;
 
+    #[inline(always)]
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -98,6 +99,7 @@ where
     type Item = &'a mut (Reader<T, E> + 'static);
     type IntoIter = ReadersIterMut<'a, T, E>;
 
+    #[inline(always)]
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
     }
@@ -118,7 +120,7 @@ where
 {
     type Item = &'a Reader<T, E>;
 
-    #[inline(always)]
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|reader| &**reader)
     }
@@ -139,7 +141,7 @@ where
 {
     type Item = &'a mut (Reader<T, E> + 'static);
 
-    #[inline(always)]
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|reader| &mut **reader)
     }
