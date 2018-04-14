@@ -143,36 +143,3 @@ where
         Lines::new(self, state)
     }
 }
-
-impl Input for Vec<char> {
-    #[inline]
-    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
-        self.get(state.index() + offset).map(Clone::clone)
-    }
-    #[inline]
-    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
-        Lines::new(self, state)
-    }
-}
-
-impl Input for String {
-    #[inline]
-    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
-        self.chars().nth(state.index() + offset)
-    }
-    #[inline]
-    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
-        Lines::new(self, state)
-    }
-}
-
-impl<'s> Input for &'s str {
-    #[inline]
-    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
-        self.chars().nth(state.index() + offset)
-    }
-    #[inline]
-    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
-        Lines::new(self, state)
-    }
-}
