@@ -20,7 +20,7 @@ pub type MyError = TokenError<&'static str>;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WhitespaceReader;
 
-impl Reader<MyToken, MyError> for WhitespaceReader {
+impl Reader<MyToken, MyError, ()> for WhitespaceReader {
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
@@ -31,6 +31,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
         input: &mut Input,
         current: &State,
         next: &mut State,
+        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
@@ -62,7 +63,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct IdentifierReader;
 
-impl Reader<MyToken, MyError> for IdentifierReader {
+impl Reader<MyToken, MyError, ()> for IdentifierReader {
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
@@ -73,6 +74,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
         input: &mut Input,
         current: &State,
         next: &mut State,
+        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
@@ -108,8 +110,10 @@ fn bench_lexer(b: &mut Bencher) {
         .add(IdentifierReader)
         .build();
 
+    let mut data = ();
+
     b.iter(|| {
-        let lexer = readers.lexer(" def  \n\t   name ".chars());
+        let lexer = readers.lexer(" def  \n\t   name ".chars(), &mut data);
         let _: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
     });
 }

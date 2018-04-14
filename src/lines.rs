@@ -23,7 +23,7 @@ impl<'a> Lines<'a> {
 
     #[inline]
     pub fn skip_line(&mut self) {
-        self.input.read_line(self.state);
+        self.input.skip_line(self.state);
     }
 }
 

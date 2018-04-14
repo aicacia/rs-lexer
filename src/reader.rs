@@ -1,31 +1,10 @@
-use super::{Input, State};
+use super::{Input, ReaderResult, State};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum ReaderResult<T, E> {
-    Some(T),
-    Err(E),
-    Empty,
-    None,
-}
-
-unsafe impl<T, E> Send for ReaderResult<T, E>
-where
-    T: Send,
-    E: Send,
-{
-}
-unsafe impl<T, E> Sync for ReaderResult<T, E>
-where
-    T: Send,
-    E: Send,
-{
-}
-
-pub trait Reader<T, E> {
+pub trait Reader<T, E, D = ()> {
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
     }
 
-    fn read(&self, &mut Input, &State, &mut State) -> ReaderResult<T, E>;
+    fn read(&self, &mut Input, &State, &mut State, &mut D) -> ReaderResult<T, E>;
 }

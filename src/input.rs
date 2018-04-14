@@ -35,6 +35,16 @@ pub trait Input {
     }
 
     #[inline]
+    fn skip_line(&mut self, state: &mut State) {
+        if !self.is_done(state) {
+            while let Some(ch) = self.read(state) {
+                if ch == '\n' {
+                    break;
+                }
+            }
+        }
+    }
+    #[inline]
     fn peek_line(&mut self, state: &State) -> Option<String> {
         if self.is_done(state) {
             None

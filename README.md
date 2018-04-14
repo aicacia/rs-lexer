@@ -19,7 +19,7 @@ pub type MyError = TokenError<&'static str>;
 
 pub struct WhitespaceReader;
 
-impl Reader<MyToken, MyError> for WhitespaceReader {
+impl Reader<MyToken, MyError, ()> for WhitespaceReader {
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
@@ -30,6 +30,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
         input: &mut Input,
         current: &State,
         next: &mut State,
+        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
@@ -60,7 +61,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
 pub struct IdentifierReader;
 
-impl Reader<MyToken, MyError> for IdentifierReader {
+impl Reader<MyToken, MyError, ()> for IdentifierReader {
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
@@ -71,6 +72,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
         input: &mut Input,
         current: &State,
         next: &mut State,
+        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
@@ -105,7 +107,8 @@ fn main() {
         .add(IdentifierReader)
         .build();
 
-    let lexer = readers.lexer("Hello world\n".chars());
+    let mut data = ();
+    let lexer = readers.lexer("Hello world\n".chars(), &mut data);
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     println!("{:#?}", tokens);
