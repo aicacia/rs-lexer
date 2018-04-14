@@ -3,31 +3,27 @@ use core::fmt::{self, Debug, Display};
 use super::TokenMeta;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Token<T, V> {
+pub struct Token<T> {
     meta: TokenMeta,
-    kind: T,
-    value: V,
+    value: T,
 }
 
-unsafe impl<T, V> Send for Token<T, V>
+unsafe impl<T> Send for Token<T>
 where
     T: Send,
-    V: Send,
 {
 }
-unsafe impl<T, V> Sync for Token<T, V>
+unsafe impl<T> Sync for Token<T>
 where
     T: Sync,
-    V: Sync,
 {
 }
 
-impl<T, V> Token<T, V> {
+impl<T> Token<T> {
     #[inline(always)]
-    pub fn new(meta: TokenMeta, kind: T, value: V) -> Self {
+    pub fn new(meta: TokenMeta, value: T) -> Self {
         Token {
             meta: meta,
-            kind: kind,
             value: value,
         }
     }
@@ -37,19 +33,14 @@ impl<T, V> Token<T, V> {
         &self.meta
     }
     #[inline(always)]
-    pub fn kind(&self) -> &T {
-        &self.kind
-    }
-    #[inline(always)]
-    pub fn value(&self) -> &V {
+    pub fn value(&self) -> &T {
         &self.value
     }
 }
 
-impl<T, V> fmt::Debug for Token<T, V>
+impl<T> fmt::Debug for Token<T>
 where
     T: Debug,
-    V: Debug,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -57,7 +48,6 @@ where
 
         f.debug_struct("Token")
             .field("value", &self.value)
-            .field("kind", &self.kind)
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())
@@ -67,10 +57,9 @@ where
     }
 }
 
-impl<T, V> fmt::Display for Token<T, V>
+impl<T> fmt::Display for Token<T>
 where
     T: Display,
-    V: Display,
 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -78,7 +67,6 @@ where
 
         f.debug_struct("Token")
             .field("value", &format!("{}", self.value))
-            .field("kind", &format!("{}", self.kind))
             .field("index", &meta.index_start())
             .field("length", &meta.len())
             .field("lines", &meta.line_count())

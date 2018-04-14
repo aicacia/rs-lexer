@@ -9,18 +9,12 @@ use test::Bencher;
 use lexer::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum TokenKind {
-    Whitespace,
-    Identifier,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenValue {
-    Chr(char),
-    Str(String),
+    Whitespace(String),
+    Identifier(String),
 }
 
-pub type MyToken = Token<TokenKind, TokenValue>;
+pub type MyToken = Token<TokenValue>;
 pub type MyError = TokenError<&'static str>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -55,8 +49,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Whitespace,
-                    TokenValue::Str(string),
+                    TokenValue::Whitespace(string),
                 ))
             } else {
                 ReaderResult::None
@@ -98,8 +91,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Identifier,
-                    TokenValue::Str(string),
+                    TokenValue::Identifier(string),
                 ))
             } else {
                 ReaderResult::None

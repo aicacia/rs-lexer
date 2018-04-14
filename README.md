@@ -6,36 +6,31 @@ plugin based lexical reader
 ```rust
 extern crate lexer;
 
-
-use lexer::{Token, TokenError, TokenMeta, Input, Reader, ReadersBuilder, State, ReaderResult};
-
-
-#[derive(Debug)]
-pub enum TokenKind {
-    Whitespace,
-    Identifier,
-}
+use lexer::{Input, Reader, ReaderResult, ReadersBuilder, State, Token, TokenError, TokenMeta};
 
 #[derive(Debug)]
 pub enum TokenValue {
-    Chr(char),
-    Str(String),
+    Whitespace(String),
+    Identifier(String),
 }
 
-pub type MyToken = Token<TokenKind, TokenValue>;
+pub type MyToken = Token<TokenValue>;
 pub type MyError = TokenError<&'static str>;
-
 
 pub struct WhitespaceReader;
 
 impl Reader<MyToken, MyError> for WhitespaceReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         0usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_whitespace() {
                 let mut string = String::new();
@@ -53,8 +48,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Whitespace,
-                    TokenValue::Str(string)
+                    TokenValue::Whitespace(string),
                 ))
             } else {
                 ReaderResult::None
@@ -67,13 +61,17 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 pub struct IdentifierReader;
 
 impl Reader<MyToken, MyError> for IdentifierReader {
-
     #[inline(always)]
     fn priority(&self) -> usize {
         1usize
     }
 
-    fn read(&self, input: &mut Input, current: &State, next: &mut State) -> ReaderResult<MyToken, MyError> {
+    fn read(
+        &self,
+        input: &mut Input,
+        current: &State,
+        next: &mut State,
+    ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
                 let mut string = String::new();
@@ -91,8 +89,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Identifier,
-                    TokenValue::Str(string)
+                    TokenValue::Identifier(string),
                 ))
             } else {
                 ReaderResult::None
@@ -101,7 +98,6 @@ impl Reader<MyToken, MyError> for IdentifierReader {
         }
     }
 }
-
 
 fn main() {
     let readers = ReadersBuilder::new()

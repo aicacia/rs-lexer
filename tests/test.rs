@@ -5,20 +5,13 @@ extern crate lexer;
 use lexer::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum TokenKind {
-    EmptyLines,
-    Whitespace,
-    Identifier,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenValue {
-    Num(usize),
-    Chr(char),
-    Str(String),
+    EmptyLines(usize),
+    Whitespace(String),
+    Identifier(String),
 }
 
-pub type MyToken = Token<TokenKind, TokenValue>;
+pub type MyToken = Token<TokenValue>;
 pub type MyError = TokenError<&'static str>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -54,8 +47,7 @@ impl Reader<MyToken, MyError> for EmptyLineReader {
         if count > 1 {
             ReaderResult::Some(Token::new(
                 TokenMeta::new_state_meta(current, next),
-                TokenKind::EmptyLines,
-                TokenValue::Num(count),
+                TokenValue::EmptyLines(count),
             ))
         } else {
             ReaderResult::None
@@ -95,8 +87,7 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Whitespace,
-                    TokenValue::Str(string),
+                    TokenValue::Whitespace(string),
                 ))
             } else {
                 ReaderResult::None
@@ -181,8 +172,7 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 
                 ReaderResult::Some(Token::new(
                     TokenMeta::new_state_meta(current, next),
-                    TokenKind::Identifier,
-                    TokenValue::Str(string),
+                    TokenValue::Identifier(string),
                 ))
             } else {
                 ReaderResult::None
@@ -207,7 +197,7 @@ fn test_lexer_newlines() {
     assert_eq!(tokens.len(), 3);
 
     let ws_token = &tokens[0];
-    assert_eq!(ws_token.kind(), &TokenKind::EmptyLines);
+    assert_eq!(ws_token.value(), &TokenValue::EmptyLines(3));
     assert_eq!(ws_token.meta().col_start(), 1);
     assert_eq!(ws_token.meta().col_end(), 1);
     assert_eq!(ws_token.meta().col_count(), 1);
@@ -215,9 +205,6 @@ fn test_lexer_newlines() {
     assert_eq!(ws_token.meta().line_end(), 4);
     assert_eq!(ws_token.meta().line_count(), 3);
     assert_eq!(ws_token.meta().len(), 3);
-    if let &TokenValue::Num(ref count) = ws_token.value() {
-        assert_eq!(count, &3);
-    }
 }
 
 #[test]
@@ -235,7 +222,10 @@ fn test_lexer_whitespace() {
     assert_eq!(tokens.len(), 1);
 
     let ws_token = &tokens[0];
-    assert_eq!(ws_token.kind(), &TokenKind::Whitespace);
+    assert_eq!(
+        ws_token.value(),
+        &TokenValue::Whitespace("   \n\t   ".into())
+    );
     assert_eq!(ws_token.meta().col_start(), 5);
     assert_eq!(ws_token.meta().col_end(), 5);
     assert_eq!(ws_token.meta().col_count(), 1);
@@ -243,9 +233,6 @@ fn test_lexer_whitespace() {
     assert_eq!(ws_token.meta().line_end(), 2);
     assert_eq!(ws_token.meta().line_count(), 1);
     assert_eq!(ws_token.meta().len(), 8);
-    if let &TokenValue::Str(ref string) = ws_token.value() {
-        assert_eq!(string.len(), 8);
-    }
 }
 
 #[test]
@@ -273,7 +260,7 @@ fn test_lexer_identifier() {
     assert_eq!(tokens.len(), 4);
 
     let ident_token = &tokens[0];
-    assert_eq!(ident_token.kind(), &TokenKind::Identifier);
+    assert_eq!(ident_token.value(), &TokenValue::Identifier("def".into()));
     assert_eq!(ident_token.meta().col_start(), 1);
     assert_eq!(ident_token.meta().col_end(), 3);
     assert_eq!(ident_token.meta().col_count(), 3);
@@ -281,11 +268,8 @@ fn test_lexer_identifier() {
     assert_eq!(ident_token.meta().line_end(), 1);
     assert_eq!(ident_token.meta().line_count(), 0);
     assert_eq!(ident_token.meta().len(), 3);
-    if let &TokenValue::Str(ref string) = ident_token.value() {
-        assert_eq!(string, "def");
-        assert_eq!(string.len(), 3);
-    }
-    assert_eq!(tokens[1].kind(), &TokenKind::Whitespace);
-    assert_eq!(tokens[2].kind(), &TokenKind::Identifier);
-    assert_eq!(tokens[3].kind(), &TokenKind::Whitespace);
+
+    assert_eq!(tokens[1].value(), &TokenValue::Whitespace(" ".into()));
+    assert_eq!(tokens[2].value(), &TokenValue::Identifier("name".into()));
+    assert_eq!(tokens[3].value(), &TokenValue::Whitespace("\n".into()));
 }
