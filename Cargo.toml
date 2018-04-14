@@ -1,6 +1,6 @@
 [package]
 name = "lexer"
-version = "0.1.13"
+version = "0.1.14"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
 keywords = ["text", "parsing", "plugin", "lexical", "reader"]

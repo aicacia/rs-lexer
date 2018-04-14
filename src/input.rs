@@ -1,4 +1,5 @@
 use alloc::string::String;
+use alloc::vec::Vec;
 
 use peek_nth::PeekableNth;
 
@@ -84,6 +85,41 @@ pub trait Input {
     }
 
     #[inline]
+    fn read_whitespaces(&mut self, state: &mut State) -> Option<String> {
+        if self.is_done(state) {
+            None
+        } else {
+            let mut string = String::new();
+
+            while let Some(ch) = self.peek(state, 0) {
+                if ch.is_whitespace() {
+                    self.read(state);
+                    string.push(ch);
+                } else {
+                    break;
+                }
+            }
+
+            if string.is_empty() {
+                None
+            } else {
+                Some(string)
+            }
+        }
+    }
+
+    #[inline]
+    fn skip_whitespaces(&mut self, state: &mut State) {
+        if !self.is_done(state) {
+            while let Some(ch) = self.peek(state, 0) {
+                if ch.is_whitespace() {
+                    self.read(state);
+                }
+            }
+        }
+    }
+
+    #[inline]
     fn is_done(&mut self, state: &State) -> bool {
         self.peek(state, 0).is_none()
     }
@@ -101,6 +137,39 @@ where
     #[inline]
     fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
         self.peek_nth(state.index() + offset).map(Clone::clone)
+    }
+    #[inline]
+    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
+        Lines::new(self, state)
+    }
+}
+
+impl Input for Vec<char> {
+    #[inline]
+    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
+        self.get(state.index() + offset).map(Clone::clone)
+    }
+    #[inline]
+    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
+        Lines::new(self, state)
+    }
+}
+
+impl Input for String {
+    #[inline]
+    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
+        self.chars().nth(state.index() + offset)
+    }
+    #[inline]
+    fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
+        Lines::new(self, state)
+    }
+}
+
+impl<'s> Input for &'s str {
+    #[inline]
+    fn peek(&mut self, state: &State, offset: usize) -> Option<char> {
+        self.chars().nth(state.index() + offset)
     }
     #[inline]
     fn lines<'a>(&'a mut self, state: &'a mut State) -> Lines<'a> {
