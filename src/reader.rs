@@ -1,10 +1,10 @@
-use super::{Input, ReaderResult, State};
+use super::{Input, ReaderResult, Readers, State};
 
-pub trait Reader<T, E, D = ()> {
+pub trait Reader<T, E> {
     #[inline(always)]
     fn priority(&self) -> usize {
-        0usize
+        0
     }
 
-    fn read(&self, &mut Input, &State, &mut State, &mut D) -> ReaderResult<T, E>;
+    fn read(&self, &Readers<T, E>, &mut Input, &State, &mut State) -> ReaderResult<T, E>;
 }

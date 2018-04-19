@@ -1,9 +1,8 @@
 use alloc::string::String;
-use alloc::vec::Vec;
 
 use peek_nth::PeekableNth;
 
-use super::{Lines, State};
+use super::{Line, Lines, State};
 
 pub trait Input {
     fn peek(&mut self, state: &State, offset: usize) -> Option<char>;
@@ -46,12 +45,13 @@ pub trait Input {
         }
     }
     #[inline]
-    fn peek_line(&mut self, state: &State) -> Option<String> {
+    fn peek_line(&mut self, state: &State) -> Option<Line> {
         if self.is_done(state) {
             None
         } else {
             let mut string = String::new();
             let mut index = 0;
+            let offset = state.index();
 
             while let Some(ch) = self.peek(state, index) {
                 if ch != '\n' {
@@ -62,15 +62,16 @@ pub trait Input {
                 }
             }
 
-            Some(string)
+            Some((offset, string).into())
         }
     }
     #[inline]
-    fn read_line(&mut self, state: &mut State) -> Option<String> {
+    fn read_line(&mut self, state: &mut State) -> Option<Line> {
         if self.is_done(state) {
             None
         } else {
             let mut string = String::new();
+            let offset = state.index();
 
             while let Some(ch) = self.read(state) {
                 if ch != '\n' {
@@ -80,7 +81,7 @@ pub trait Input {
                 }
             }
 
-            Some(string)
+            Some((offset, string).into())
         }
     }
 

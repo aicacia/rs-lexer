@@ -25,10 +25,10 @@ impl Reader<MyToken, MyError> for EmptyLineReader {
 
     fn read(
         &self,
+        _: &Readers<MyToken, MyError>,
         input: &mut Input,
         current: &State,
         next: &mut State,
-        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         let mut count = 0;
 
@@ -67,10 +67,10 @@ impl Reader<MyToken, MyError> for WhitespaceReader {
 
     fn read(
         &self,
+        _: &Readers<MyToken, MyError>,
         input: &mut Input,
         current: &State,
         next: &mut State,
-        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read_whitespaces(next) {
             Some(string) => ReaderResult::Some(Token::new(
@@ -93,10 +93,10 @@ impl Reader<MyToken, MyError> for EmptyReader {
 
     fn read(
         &self,
+        _: &Readers<MyToken, MyError>,
         input: &mut Input,
         _: &State,
         next: &mut State,
-        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
@@ -137,10 +137,10 @@ impl Reader<MyToken, MyError> for IdentifierReader {
 
     fn read(
         &self,
+        _: &Readers<MyToken, MyError>,
         input: &mut Input,
         current: &State,
         next: &mut State,
-        _: &mut (),
     ) -> ReaderResult<MyToken, MyError> {
         match input.read(next) {
             Some(ch) => if ch.is_alphabetic() {
@@ -178,8 +178,7 @@ fn test_lexer_newlines() {
         .add(EmptyLineReader)
         .build();
 
-    let mut data = ();
-    let lexer = readers.lexer("\n\n\nHello\n".chars(), &mut data);
+    let lexer = readers.lexer("\n\n\nHello\n".chars());
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     assert_eq!(tokens.len(), 3);
@@ -204,8 +203,7 @@ fn test_lexer_whitespace() {
         .add(EmptyLineReader)
         .build();
 
-    let mut data = ();
-    let lexer = readers.lexer("EMPTY   \n\t   EMPTY".chars(), &mut data);
+    let lexer = readers.lexer("EMPTY   \n\t   EMPTY".chars());
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     assert_eq!(tokens.len(), 1);
@@ -244,8 +242,7 @@ fn test_lexer_identifier() {
             Err(e) => panic!("{:?}", e),
         });
 
-    let mut data = ();
-    let lexer = readers.lexer(chars, &mut data);
+    let lexer = readers.lexer(chars);
     let tokens: Vec<MyToken> = lexer.map(|t| t.unwrap()).collect();
 
     assert_eq!(tokens.len(), 4);

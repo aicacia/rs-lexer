@@ -1,9 +1,3 @@
-lexer
-=====
-
-plugin based lexical reader
-
-```rust
 #![feature(io)]
 
 extern crate lexer;
@@ -249,4 +243,3 @@ fn main() {
 
     println!("{:#?}", tokens);
 }
-```

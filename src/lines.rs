@@ -1,6 +1,4 @@
-use alloc::string::String;
-
-use super::{Input, State};
+use super::{Input, Line, State};
 
 pub struct Lines<'a> {
     state: &'a mut State,
@@ -17,7 +15,7 @@ impl<'a> Lines<'a> {
     }
 
     #[inline]
-    pub fn peek_line(&mut self) -> Option<String> {
+    pub fn peek_line(&mut self) -> Option<Line> {
         self.input.peek_line(self.state)
     }
 
@@ -28,7 +26,7 @@ impl<'a> Lines<'a> {
 }
 
 impl<'a> Iterator for Lines<'a> {
-    type Item = String;
+    type Item = Line;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -48,9 +46,9 @@ mod test {
         let mut state = State::new();
         let mut lines = input.lines(&mut state);
 
-        assert_eq!(lines.next(), Some(String::from("abc")));
-        assert_eq!(lines.next(), Some(String::from("def")));
-        assert_eq!(lines.next(), Some(String::from("ghi")));
+        assert_eq!(lines.next(), Some(Line::from("abc")));
+        assert_eq!(lines.next(), Some(Line::from("def")));
+        assert_eq!(lines.next(), Some(Line::from("ghi")));
         assert_eq!(lines.next(), None);
     }
 }
