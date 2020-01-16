@@ -1,10 +1,16 @@
 use super::{Input, ReaderResult, Readers, State};
 
 pub trait Reader<T, E> {
-    #[inline(always)]
-    fn priority(&self) -> usize {
-        0
-    }
+  #[inline(always)]
+  fn priority(&self) -> usize {
+    0
+  }
 
-    fn read(&self, &Readers<T, E>, &mut Input, &State, &mut State) -> ReaderResult<T, E>;
+  fn read(
+    &self,
+    reader: &Readers<T, E>,
+    input: &mut dyn Input,
+    current: &State,
+    next: &mut State,
+  ) -> ReaderResult<T, E>;
 }

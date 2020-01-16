@@ -1,5 +1,3 @@
-#![feature(alloc)]
-#![feature(get_type_id)]
 #![no_std]
 
 #[macro_use]
