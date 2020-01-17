@@ -104,7 +104,7 @@ impl TokenMeta {
 
   #[inline(always)]
   pub fn col_count(&self) -> u64 {
-    (self.col_end - self.col_start) + 1
+    self.col_end - self.col_start
   }
 }
 

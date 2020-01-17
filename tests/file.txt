@@ -1,1 +1,2 @@
-def name
+(def-fn hello ()
+  (println :Hello, "World!"))

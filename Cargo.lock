@@ -2,11 +2,19 @@
 # It is not intended for manual editing.
 [[package]]
 name = "lexer"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
+ "lisp 0.1.0",
  "peek-nth 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.66 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "lisp"
+version = "0.1.0"
+dependencies = [
+ "lexer 0.1.17",
 ]
 
 [[package]]
