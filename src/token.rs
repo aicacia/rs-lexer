@@ -25,8 +25,16 @@ impl<T> Token<T> {
     &self.meta
   }
   #[inline(always)]
+  pub fn into_meta(self) -> TokenMeta {
+    self.meta
+  }
+  #[inline(always)]
   pub fn value(&self) -> &T {
     &self.value
+  }
+  #[inline(always)]
+  pub fn into_value(self) -> T {
+    self.value
   }
 }
 
