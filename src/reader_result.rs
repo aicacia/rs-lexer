@@ -1,5 +1,3 @@
-use core::ops::Try;
-
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ReaderResult<T, E> {
   Some(T),
