@@ -26,19 +26,7 @@ impl<T, E> ReadersBuilder<T, E> {
 
   #[inline]
   pub fn add<R: 'static + Reader<T, E>>(mut self, reader: R) -> Self {
-    let index = self
-      .0
-      .iter()
-      .position(|r| reader.priority() <= r.priority());
-
-    let boxed_reader = Box::new(reader);
-
-    if let Some(index) = index {
-      self.0.insert(index, boxed_reader);
-    } else {
-      self.0.push(boxed_reader);
-    }
-
+    self.0.push(Box::new(reader));
     self
   }
 

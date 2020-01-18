@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
-use core::any::{Any, TypeId};
+use core::ops::{Deref, DerefMut};
 use core::slice;
 
 use super::{Reader, ReadersBuilder, ReadersLexer};
@@ -28,43 +28,10 @@ impl<T, E> From<ReadersBuilder<T, E>> for Readers<T, E> {
   }
 }
 
-impl<T, E> Readers<T, E>
-where
-  T: 'static,
-  E: 'static,
-{
-  #[inline]
-  pub fn remove<R: 'static + Reader<T, E>>(&mut self) {
-    let type_id = TypeId::of::<R>();
-
-    if let Some(index) = self.0.iter().position(|r| (&**r).type_id() == type_id) {
-      self.0.remove(index);
-    }
-  }
-}
-
 impl<T, E> Readers<T, E> {
   #[inline]
   pub fn new() -> Self {
     Readers(Vec::new())
-  }
-
-  #[inline]
-  pub fn add<R: 'static + Reader<T, E>>(&mut self, reader: R) -> &mut Self {
-    let index = self
-      .0
-      .iter()
-      .position(|r| reader.priority() <= r.priority());
-
-    let boxed_reader = Box::new(reader);
-
-    if let Some(index) = index {
-      self.0.insert(index, boxed_reader);
-    } else {
-      self.0.push(boxed_reader);
-    }
-
-    self
   }
 
   #[inline]
@@ -86,6 +53,22 @@ impl<T, E> Readers<T, E> {
   }
 }
 
+impl<T, E> Deref for Readers<T, E> {
+  type Target = Vec<Box<dyn Reader<T, E>>>;
+
+  #[inline]
+  fn deref(&self) -> &Self::Target {
+    &self.0
+  }
+}
+
+impl<T, E> DerefMut for Readers<T, E> {
+  #[inline]
+  fn deref_mut(&mut self) -> &mut Self::Target {
+    &mut self.0
+  }
+}
+
 impl<'a, T, E> Readers<T, E>
 where
   T: 'a,
@@ -95,6 +78,12 @@ where
   pub fn iter(&'a self) -> ReadersIter<'a, T, E> {
     ReadersIter {
       iter: self.0.iter(),
+    }
+  }
+  #[inline]
+  pub fn iter_mut(&'a mut self) -> ReadersIterMut<'a, T, E> {
+    ReadersIterMut {
+      iter: self.0.iter_mut(),
     }
   }
 }
@@ -110,6 +99,20 @@ where
   #[inline(always)]
   fn into_iter(self) -> Self::IntoIter {
     self.iter()
+  }
+}
+
+impl<'a, T, E> IntoIterator for &'a mut Readers<T, E>
+where
+  T: 'a,
+  E: 'a,
+{
+  type Item = &'a mut (dyn Reader<T, E> + 'static);
+  type IntoIter = ReadersIterMut<'a, T, E>;
+
+  #[inline(always)]
+  fn into_iter(self) -> Self::IntoIter {
+    self.iter_mut()
   }
 }
 
@@ -131,5 +134,26 @@ where
   #[inline]
   fn next(&mut self) -> Option<Self::Item> {
     self.iter.next().map(|reader| &**reader)
+  }
+}
+
+pub struct ReadersIterMut<'a, T, E>
+where
+  T: 'a,
+  E: 'a,
+{
+  iter: slice::IterMut<'a, Box<dyn Reader<T, E>>>,
+}
+
+impl<'a, T, E> Iterator for ReadersIterMut<'a, T, E>
+where
+  T: 'a,
+  E: 'a,
+{
+  type Item = &'a mut (dyn Reader<T, E> + 'static);
+
+  #[inline]
+  fn next(&mut self) -> Option<Self::Item> {
+    self.iter.next().map(|reader| &mut **reader)
   }
 }

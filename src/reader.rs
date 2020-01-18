@@ -1,11 +1,6 @@
 use super::{Input, ReaderResult, Readers, State};
 
 pub trait Reader<T, E> {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    0
-  }
-
   fn read(
     &self,
     reader: &Readers<T, E>,

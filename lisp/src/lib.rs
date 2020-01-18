@@ -47,11 +47,6 @@ pub type TokenError = lexer::TokenError<&'static str>;
 pub struct WhitespaceReader;
 
 impl Reader<Token, TokenError> for WhitespaceReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    0usize
-  }
-
   fn read(
     &self,
     _: &Readers<Token, TokenError>,
@@ -84,11 +79,6 @@ impl Reader<Token, TokenError> for WhitespaceReader {
 pub struct NumberReader;
 
 impl Reader<Token, TokenError> for NumberReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    1usize
-  }
-
   fn read(
     &self,
     _: &Readers<Token, TokenError>,
@@ -129,11 +119,6 @@ impl Reader<Token, TokenError> for NumberReader {
 pub struct StringReader;
 
 impl Reader<Token, TokenError> for StringReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    2usize
-  }
-
   fn read(
     &self,
     _: &Readers<Token, TokenError>,
@@ -171,11 +156,6 @@ impl Reader<Token, TokenError> for StringReader {
 pub struct KeywordReader;
 
 impl Reader<Token, TokenError> for KeywordReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    3usize
-  }
-
   fn read(
     &self,
     _: &Readers<Token, TokenError>,
@@ -214,11 +194,6 @@ impl Reader<Token, TokenError> for KeywordReader {
 pub struct ListReader;
 
 impl Reader<Token, TokenError> for ListReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    4usize
-  }
-
   fn read(
     &self,
     readers: &Readers<Token, TokenError>,
@@ -267,11 +242,6 @@ impl Reader<Token, TokenError> for ListReader {
 pub struct IdentifierReader;
 
 impl Reader<Token, TokenError> for IdentifierReader {
-  #[inline(always)]
-  fn priority(&self) -> usize {
-    5usize
-  }
-
   fn read(
     &self,
     _: &Readers<Token, TokenError>,
