@@ -1,3 +1,5 @@
+use core::ops::Try;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ReaderResult<T, E> {
   Some(T),
@@ -17,4 +19,14 @@ where
   T: Send,
   E: Send,
 {
+}
+
+impl<T, E> From<Result<T, E>> for ReaderResult<T, E> {
+  #[inline]
+  fn from(result: Result<T, E>) -> Self {
+    match result {
+      Ok(value) => ReaderResult::Some(value),
+      Err(error) => ReaderResult::Err(error),
+    }
+  }
 }
