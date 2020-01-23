@@ -2,7 +2,7 @@ use peek_nth::{IteratorExt, PeekableNth};
 
 use super::{next, Readers, State};
 
-pub struct ReadersLexer<'a, T, E, I>
+pub struct Lexer<'a, T, E, I>
 where
   T: 'a,
   E: 'a,
@@ -13,14 +13,14 @@ where
   input: PeekableNth<I>,
 }
 
-unsafe impl<'a, T, E, I> Sync for ReadersLexer<'a, T, E, I>
+unsafe impl<'a, T, E, I> Sync for Lexer<'a, T, E, I>
 where
   T: 'a + Sync,
   E: 'a + Sync,
   I: 'a + Sync + IteratorExt<Item = char>,
 {
 }
-unsafe impl<'a, T, E, I> Send for ReadersLexer<'a, T, E, I>
+unsafe impl<'a, T, E, I> Send for Lexer<'a, T, E, I>
 where
   T: 'a + Send,
   E: 'a + Send,
@@ -28,7 +28,7 @@ where
 {
 }
 
-impl<'a, T, E, I> From<(&'a Readers<T, E>, I)> for ReadersLexer<'a, T, E, I>
+impl<'a, T, E, I> From<(&'a Readers<T, E>, I)> for Lexer<'a, T, E, I>
 where
   T: 'a,
   E: 'a,
@@ -36,15 +36,11 @@ where
 {
   #[inline(always)]
   fn from((readers, iter): (&'a Readers<T, E>, I)) -> Self {
-    ReadersLexer {
-      readers: readers,
-      state: State::new(),
-      input: iter.peekable_nth(),
-    }
+    Self::new(readers, iter)
   }
 }
 
-impl<'a, T, E, I> ReadersLexer<'a, T, E, I>
+impl<'a, T, E, I> Lexer<'a, T, E, I>
 where
   T: 'a,
   E: 'a,
@@ -52,11 +48,15 @@ where
 {
   #[inline(always)]
   pub fn new(readers: &'a Readers<T, E>, iter: I) -> Self {
-    From::from((readers, iter))
+    Lexer {
+      readers: readers,
+      state: State::new(),
+      input: iter.peekable_nth(),
+    }
   }
 }
 
-impl<'a, T, E, I> Iterator for ReadersLexer<'a, T, E, I>
+impl<'a, T, E, I> Iterator for Lexer<'a, T, E, I>
 where
   T: 'a,
   E: 'a,

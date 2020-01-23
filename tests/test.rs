@@ -20,7 +20,7 @@ fn test_lexer_identifier() {
   };
 
   println!("{}", string);
-  let lexer = readers.lexer(string.chars());
+  let lexer = readers.tokens(string.chars());
   let tokens: Vec<Token> = lexer.map(Result::unwrap).collect();
 
   assert_eq!(tokens.len(), 1);

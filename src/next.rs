@@ -47,7 +47,7 @@ pub fn next<T, E>(
     } else {
       debug_assert!(
         orig_state.index() != state.index() || input.is_done(&state),
-        "ReadersLexer: No reader was able to read at {:?}",
+        "Lexer: No reader was able to read at {:?}",
         orig_state
       );
       token

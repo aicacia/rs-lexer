@@ -1,28 +1,40 @@
 use alloc::string::String;
-
 use core::cmp::Ordering;
 use core::fmt;
+use core::hash::{Hasher, Hash};
 use core::ops::{Deref, DerefMut};
 
 use super::{Input, Lines, State};
 
-#[derive(Eq, Ord, Hash)]
+#[derive(Eq)]
 pub struct Line {
   offset: usize,
   line: String,
 }
 
+impl Hash for Line {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+      self.line.hash(state);
+  }
+}
+
 impl PartialEq for Line {
-  #[inline(always)]
+  #[inline]
   fn eq(&self, other: &Self) -> bool {
-    &self.line == &other.line
+    self.line.eq(&other.line)
   }
 }
 
 impl PartialOrd for Line {
-  #[inline(always)]
+  #[inline]
   fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
     self.line.partial_cmp(&other.line)
+  }
+}
+
+impl Ord for Line {
+  fn cmp(&self, other: &Self) -> Ordering {
+    self.line.cmp(&other.line)
   }
 }
 

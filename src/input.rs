@@ -122,11 +122,11 @@ pub trait Input {
 
   #[inline]
   fn is_done(&mut self, state: &State) -> bool {
-    self.peek(state, 0).is_none()
+    !self.can_peek(state, 0)
   }
 
   #[inline]
-  fn can_read(&mut self, state: &State, offset: usize) -> bool {
+  fn can_peek(&mut self, state: &State, offset: usize) -> bool {
     self.peek(state, offset).is_some()
   }
 }

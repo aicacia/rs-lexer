@@ -1,10 +1,11 @@
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-
 use core::ops::{Deref, DerefMut};
 use core::slice;
 
-use super::{Reader, ReadersBuilder, ReadersLexer};
+use peek_nth::{IteratorExt, PeekableNth};
+
+use super::{Lexer, Reader, ReadersBuilder};
 
 pub struct Readers<T, E>(Vec<Box<dyn Reader<T, E>>>);
 
@@ -45,11 +46,11 @@ impl<T, E> Readers<T, E> {
   }
 
   #[inline]
-  pub fn lexer<'a, I>(&'a self, iter: I) -> ReadersLexer<'a, T, E, I>
+  pub fn tokens<'a, I>(&'a self, iter: I) -> PeekableNth<Lexer<'a, T, E, I>>
   where
     I: Iterator<Item = char>,
   {
-    ReadersLexer::new(self, iter)
+    Lexer::new(self, iter).peekable_nth()
   }
 }
 
