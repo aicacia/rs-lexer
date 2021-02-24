@@ -1,5 +1,10 @@
 # lexer
 
+[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue")](LICENSE-MIT)
+[![API](https://docs.rs/lexer/badge.svg)](https://docs.rs/lexer)
+[![Crate](https://img.shields.io/crates/v/lexer.svg)](https://crates.io/crates/lexer)
+[![Test Status](https://github.com/aicacia/rs-lexer/workflows/Tests/badge.svg?event=push)](https://github.com/aicacia/rs-lexer/actions)
+
 plugin based lexical reader
 
 ```rust

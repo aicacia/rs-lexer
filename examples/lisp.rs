@@ -8,6 +8,7 @@ fn main() {
 
   let mut tokens =
     readers.tokens("(hello,\n \"Hello, world!\",\n 10,\n true,\n false,\n:keyword)".chars());
+
   let token = tokens
     .next()
     .map(Result::unwrap)

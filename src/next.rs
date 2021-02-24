@@ -14,8 +14,7 @@ pub fn next<T, E>(
     let mut is_empty = false;
     let orig_state = state.clone();
 
-    let mut index = 0;
-    while let Some(reader) = readers.get(index) {
+    for reader in readers.iter() {
       let mut next_state = orig_state.clone();
 
       match reader.read(readers, input, &orig_state, &mut next_state) {
@@ -34,12 +33,10 @@ pub fn next<T, E>(
         }
         ReaderResult::None => (),
       }
-
-      index += 1;
     }
 
-    if let Some(ref s) = new_state {
-      state.clone_from(s);
+    if let Some(s) = new_state {
+      state.clone_from(&s);
     }
 
     if is_empty {
