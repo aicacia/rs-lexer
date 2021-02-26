@@ -86,7 +86,7 @@ pub trait Input {
   }
 
   #[inline]
-  fn read_whitespaces(&mut self, state: &mut State) -> Option<String> {
+  fn read_whitespace(&mut self, state: &mut State) -> Option<String> {
     if self.is_done(state) {
       None
     } else {

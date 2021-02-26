@@ -211,7 +211,7 @@ impl Reader<Token, TokenError> for ListReader {
               input.read(next);
               break;
             } else {
-              match lexer::next(readers, input, next) {
+              match lexer::read(readers, input, next) {
                 Some(Ok(token)) => {
                   list.push(token);
                 }
@@ -292,4 +292,27 @@ pub fn readers() -> lexer::Readers<Token, TokenError> {
     .add(ListReader)
     .add(IdentifierReader)
     .build()
+}
+
+#[test]
+fn test_read() {
+  let readers = readers();
+
+  let string = "(def-fn hello () (println :Hello, \"World!\"))";
+
+  let tokens = readers.read(string.chars());
+  let tokens: Vec<Token> = tokens.map(Result::unwrap).collect();
+
+  assert_eq!(tokens.len(), 1);
+
+  if let Some(&TokenValue::List(ref tokens)) = tokens.get(0).map(Token::value) {
+    let first = tokens.first().unwrap();
+    assert_eq!(first.meta().col_start(), 1);
+    assert_eq!(first.meta().col_end(), 7);
+    assert_eq!(first.meta().col_count(), 6);
+    assert_eq!(first.meta().line_start(), 1);
+    assert_eq!(first.meta().line_end(), 1);
+    assert_eq!(first.meta().line_count(), 0);
+    assert_eq!(first.meta().len(), 6);
+  }
 }

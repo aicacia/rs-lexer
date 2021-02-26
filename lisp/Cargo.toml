@@ -11,5 +11,3 @@ homepage = "https://gitlab.com/nathanfaucett/rs-lisp"
 
 [dependencies]
 lexer = { version = "0.1", path = ".." }
-
-[dev-dependencies]

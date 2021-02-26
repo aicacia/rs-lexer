@@ -1,7 +1,7 @@
 use alloc::string::String;
 use core::cmp::Ordering;
 use core::fmt;
-use core::hash::{Hasher, Hash};
+use core::hash::{Hash, Hasher};
 use core::ops::{Deref, DerefMut};
 
 use super::{Input, Lines, State};
@@ -14,7 +14,7 @@ pub struct Line {
 
 impl Hash for Line {
   fn hash<H: Hasher>(&self, state: &mut H) {
-      self.line.hash(state);
+    self.line.hash(state);
   }
 }
 

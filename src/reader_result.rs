@@ -28,3 +28,13 @@ impl<T, E> From<Result<T, E>> for ReaderResult<T, E> {
     }
   }
 }
+
+impl<T, E> From<Option<T>> for ReaderResult<T, E> {
+  #[inline]
+  fn from(option: Option<T>) -> Self {
+    match option {
+      Some(value) => ReaderResult::Some(value),
+      None => ReaderResult::None,
+    }
+  }
+}

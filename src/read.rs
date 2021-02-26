@@ -1,7 +1,7 @@
 use super::{Input, ReaderResult, Readers, State};
 
 #[inline]
-pub fn next<T, E>(
+pub fn read<T, E>(
   readers: &Readers<T, E>,
   input: &mut dyn Input,
   state: &mut State,
@@ -40,11 +40,11 @@ pub fn next<T, E>(
     }
 
     if is_empty {
-      next(readers, input, state)
+      read(readers, input, state)
     } else {
       debug_assert!(
         orig_state.index() != state.index() || input.is_done(&state),
-        "Lexer: No reader was able to read at {:?}",
+        "No reader was able to read at {:?}",
         orig_state
       );
       token

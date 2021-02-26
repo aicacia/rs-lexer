@@ -1,5 +1,3 @@
-use core::fmt;
-
 use super::State;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -105,12 +103,5 @@ impl TokenMeta {
   #[inline(always)]
   pub fn col_count(&self) -> u64 {
     self.col_end - self.col_start
-  }
-}
-
-impl fmt::Display for TokenMeta {
-  #[inline(always)]
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    fmt::Debug::fmt(self, f)
   }
 }

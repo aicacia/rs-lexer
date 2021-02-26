@@ -17,9 +17,6 @@ serde = { version = "1.0", default-features = false }
 serde_derive = "1.0"
 peek-nth = "0.2"
 
-[dev-dependencies]
-lisp = { version = "0.1", path = "./lisp" }
-
 [workspace]
 members = [
   "lisp"

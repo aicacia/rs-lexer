@@ -1,2 +1,0 @@
-(def-fn hello ()
-  (println :Hello, "World!"))
