@@ -2,9 +2,8 @@
 
 extern crate alloc;
 
-extern crate serde;
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;
 extern crate peek_nth;
 
 mod input;

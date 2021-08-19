@@ -10,7 +10,6 @@ plugin based lexical reader
 ```rust
 extern crate lexer;
 
-use std::collections::LinkedList;
 use std::fmt::{self, Write};
 
 use lexer::{Input, Reader, ReaderResult, Readers, ReadersBuilder, State, TokenMeta};
@@ -21,7 +20,7 @@ pub enum TokenValue {
   String(String),
   Keyword(String),
   Identifier(String),
-  List(LinkedList<Token>),
+  List(Vec<Token>),
 }
 
 impl fmt::Display for TokenValue {
@@ -67,9 +66,9 @@ impl Reader<Token, TokenError> for WhitespaceReader {
   ) -> ReaderResult<Token, TokenError> {
     match input.read(next) {
       Some(ch) => {
-        if ch.is_whitespace() || ch == ',' {
+        if is_whitespace(ch) {
           while let Some(ch) = input.peek(next, 0) {
-            if ch.is_whitespace() || ch == ',' {
+            if is_whitespace(ch) {
               input.read(next);
             } else {
               break;
@@ -99,7 +98,7 @@ impl Reader<Token, TokenError> for NumberReader {
   ) -> ReaderResult<Token, TokenError> {
     match input.read(next) {
       Some(ch) => {
-        if ch.is_numeric() {
+        if ch.is_numeric() || ch == '-' {
           let mut string = String::new();
 
           string.push(ch);
@@ -180,57 +179,17 @@ impl Reader<Token, TokenError> for KeywordReader {
           let mut string = String::new();
 
           while let Some(ch) = input.peek(next, 0) {
-            if ch.is_alphanumeric() {
+            if is_closer(ch) || is_whitespace(ch) {
+              break;
+            } else {
               input.read(next);
               string.push(ch);
-            } else {
-              break;
             }
           }
 
           ReaderResult::Some(Token::new(
             TokenMeta::new_state_meta(current, next),
             TokenValue::Keyword(string),
-          ))
-        } else {
-          ReaderResult::None
-        }
-      }
-      None => ReaderResult::None,
-    }
-  }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct IdentifierReader;
-
-impl Reader<Token, TokenError> for IdentifierReader {
-  fn read(
-    &self,
-    _: &Readers<Token, TokenError>,
-    input: &mut dyn Input,
-    current: &State,
-    next: &mut State,
-  ) -> ReaderResult<Token, TokenError> {
-    match input.read(next) {
-      Some(ch) => {
-        if ch.is_alphabetic() {
-          let mut string = String::new();
-
-          string.push(ch);
-
-          while let Some(ch) = input.peek(next, 0) {
-            if ch.is_alphanumeric() {
-              input.read(next);
-              string.push(ch);
-            } else {
-              break;
-            }
-          }
-
-          ReaderResult::Some(Token::new(
-            TokenMeta::new_state_meta(current, next),
-            TokenValue::Identifier(string),
           ))
         } else {
           ReaderResult::None
@@ -255,16 +214,16 @@ impl Reader<Token, TokenError> for ListReader {
     match input.read(next) {
       Some(ch) => {
         if ch == '(' {
-          let mut list = LinkedList::new();
+          let mut list = Vec::new();
 
           while let Some(ch) = input.peek(next, 0) {
             if ch == ')' {
               input.read(next);
               break;
             } else {
-              match lexer::next(readers, input, next) {
+              match lexer::read(readers, input, next) {
                 Some(Ok(token)) => {
-                  list.push_back(token);
+                  list.push(token);
                 }
                 Some(Err(error)) => {
                   return ReaderResult::Err(error);
@@ -289,21 +248,81 @@ impl Reader<Token, TokenError> for ListReader {
   }
 }
 
-fn main() {
-  let readers = ReadersBuilder::new()
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct IdentifierReader;
+
+impl Reader<Token, TokenError> for IdentifierReader {
+  fn read(
+    &self,
+    _: &Readers<Token, TokenError>,
+    input: &mut dyn Input,
+    current: &State,
+    next: &mut State,
+  ) -> ReaderResult<Token, TokenError> {
+    match input.read(next) {
+      Some(ch) => {
+        let mut string = String::new();
+
+        string.push(ch);
+
+        while let Some(ch) = input.peek(next, 0) {
+          if is_closer(ch) || is_whitespace(ch) {
+            break;
+          } else {
+            input.read(next);
+            string.push(ch);
+          }
+        }
+
+        ReaderResult::Some(Token::new(
+          TokenMeta::new_state_meta(current, next),
+          TokenValue::Identifier(string),
+        ))
+      }
+      None => ReaderResult::None,
+    }
+  }
+}
+
+#[inline]
+fn is_whitespace(ch: char) -> bool {
+  ch.is_whitespace() || ch == ','
+}
+
+fn is_closer(ch: char) -> bool {
+  ch == ')'
+}
+
+pub fn readers() -> lexer::Readers<Token, TokenError> {
+  ReadersBuilder::new()
     .add(WhitespaceReader)
     .add(NumberReader)
     .add(StringReader)
     .add(KeywordReader)
-    .add(IdentifierReader)
     .add(ListReader)
-    .build();
+    .add(IdentifierReader)
+    .build()
+}
 
-  let lexer =
-    readers.lexer("(hello,\n \"Hello, world!\",\n 10,\n true,\n false,\n:keyword)".chars());
-  let tokens: Vec<Token> = lexer.map(Result::unwrap).collect();
-  let token = tokens.get(0).map(lexer::Token::value).unwrap();
+fn main() {
+  let readers = readers();
 
-  println!("{:#?}", tokens);
+  let string = "(def-fn hello () (println :Hello, \"World!\"))";
+
+  let tokens = readers.read(string.chars());
+  let tokens: Vec<Token> = tokens.map(Result::unwrap).collect();
+
+  assert_eq!(tokens.len(), 1);
+
+  if let Some(&TokenValue::List(ref tokens)) = tokens.get(0).map(Token::value) {
+    let first = tokens.first().unwrap();
+    assert_eq!(first.meta().col_start(), 1);
+    assert_eq!(first.meta().col_end(), 7);
+    assert_eq!(first.meta().col_count(), 6);
+    assert_eq!(first.meta().line_start(), 1);
+    assert_eq!(first.meta().line_end(), 1);
+    assert_eq!(first.meta().line_count(), 0);
+    assert_eq!(first.meta().len(), 6);
+  }
 }
 ```

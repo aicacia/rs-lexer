@@ -314,5 +314,7 @@ fn test_read() {
     assert_eq!(first.meta().line_end(), 1);
     assert_eq!(first.meta().line_count(), 0);
     assert_eq!(first.meta().len(), 6);
+  } else {
+    assert!(false);
   }
 }

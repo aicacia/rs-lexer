@@ -1,6 +1,6 @@
 [package]
 name = "lexer"
-version = "0.1.17"
+version = "0.1.18"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
 keywords = ["text", "parsing", "plugin", "lexical", "reader"]
@@ -13,8 +13,7 @@ repository = "https://github.com/aicacia/rs-lexer.git"
 homepage = "https://github.com/aicacia/rs-lexer"
 
 [dependencies]
-serde = { version = "1.0", default-features = false }
-serde_derive = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 peek-nth = "0.2"
 
 [workspace]
